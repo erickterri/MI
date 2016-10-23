@@ -6,6 +6,8 @@
 	var mtlLoader = new THREE.MTLLoader();
 	var empty = new THREE.Object3D();
 	empty.name = "empty";
+	var modelosEscena = new THREE.Object3D();
+	modelosEscena.name = "modelosEscena";
 	var teclado=new THREEx.KeyboardState();
 	var arrayGemas = [];
 	var pausar = false;
@@ -285,10 +287,17 @@
           object.rotation.y = THREE.Math.degToRad(rotationEjes[1]);
           object.rotation.z = THREE.Math.degToRad(rotationEjes[2]);
           //object.receiveShadow = true; 
-          empty.add(object);   
-          scene.add( empty );
+          
           if(nombre == "avion"){
+          	empty.add(object);   
+          scene.add( empty );
           		modeloOBJ2("modelos/avion/Avioneta.jpg", "modelos/avion/helice_avioneta.obj", posicionEjes, rotationEjes, escalaEjes, "helice");
+      	  }
+      	  else
+      	  {
+      	  	modelosEscena.add(object);   
+          	scene.add( modelosEscena );
+      	  	
       	  }
       });
 
