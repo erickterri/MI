@@ -1,0 +1,44 @@
+<html>
+<head>
+	<title>7.1 Introduccion</title>
+	<script type="text/javascript" src="js/libs/jquery/jquery-2.1.4.min.js"></script>
+	<script type="text/javascript" src="js/libs/three/three.js"></script>
+	<!-- mio -->
+	<script type="text/javascript" src="js/libs/three/OrbitControls.js"></script>
+	<script type="text/javascript" src="js/libs/three/THREEx.WindowResize.js"></script>
+	<script type="text/javascript" src="js/libs/three/THREEx.KeyboardState.js"></script> 
+	<script type="text/javascript" src="js/libs/three/DDSLoader.js"></script>
+	<script type="text/javascript" src="js/libs/three/MTLLoader.js"></script>
+	<script type="text/javascript" src="js/libs/three/OBJLoader.js"></script>
+	<script type="text/javascript" src="js/libs/three/DatGui/dat.gui.js"></script>
+	<!-- mio -->
+	<script type="text/javascript" src="js/models/codigo.js"></script>
+	<link rel="stylesheet" type="text/css" href="css/estilo.css">
+	<script type="text/javascript">
+
+
+	$(document).ready(function() {
+		init();
+	});
+
+	
+	</script>
+</head>
+
+
+<body>
+
+	<!--a href="#" id="printimg">Guardar Imagen</a -->
+	
+	<script type="text/javascript">
+
+			$('#printimg').click(function(){
+				window.open(Render.domElement.toDataURL('image/png'),'Final');return false;
+			});
+						
+	</script> 
+
+
+	<div id="scene-section"/>
+</body>
+</html>
