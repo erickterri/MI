@@ -182,7 +182,7 @@
 			cube3.rotation.z += THREE.Math.degToRad(100 * deltaTime);
 		}*/
 
-		var avion = scene.getObjectByName("empty");
+		var avion = scene.getObjectByName("avion");
 		var helice = scene.getObjectByName("helice");
 		
 
