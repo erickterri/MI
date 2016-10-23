@@ -6,13 +6,10 @@
 	var mtlLoader = new THREE.MTLLoader();
 	var empty = new THREE.Object3D();
 	empty.name = "empty";
-	var escenario = new THREE.Object3D();
-	escenario.name = "escenario";
 	var teclado=new THREEx.KeyboardState();
 	var arrayGemas = [];
 	var pausar = false;
 	var puntos = 0;
-	var engine = new ParticleEngine();
 
 	function init(){
 		var visibleSize = {width: window.innerWidth, height: window.innerHeight};
@@ -35,7 +32,6 @@
 		//geometrias();
 		//crear_plano();
 		//skybox();
-		//particulas();
 
 
 
@@ -54,11 +50,6 @@
 		
 		$("#scene-section").append(renderer.domElement);
 		render();
-	}
-
-	function particulas(){
-		engine.setValues( Examples.smoke );
-		engine.initialize();
 	}
 
 	function skybox(){
@@ -177,14 +168,9 @@
 
 		if(!pausar){
 			acciones(deltaTime);
-			//update(deltaTime);
 		}
 
 		renderer.render(scene, camera);
-	}
-
-	function update(deltaTime){
-		engine.update( deltaTime * 0.5 );	
 	}
 
 	function acciones(deltaTime)
@@ -299,17 +285,10 @@
           object.rotation.y = THREE.Math.degToRad(rotationEjes[1]);
           object.rotation.z = THREE.Math.degToRad(rotationEjes[2]);
           //object.receiveShadow = true; 
-          
-          
+          empty.add(object);   
+          scene.add( empty );
           if(nombre == "avion"){
-          	empty.add(object);
-          	modeloOBJ2("modelos/avion/Avioneta.jpg", "modelos/avion/helice_avioneta.obj", posicionEjes, rotationEjes, escalaEjes, "helice");
-      	  	scene.add( empty );
-      	  }
-      	  else
-      	  {
-      	  	escenario.add(object);
-      	  	scene.add( escenario );
+          		modeloOBJ2("modelos/avion/Avioneta.jpg", "modelos/avion/helice_avioneta.obj", posicionEjes, rotationEjes, escalaEjes, "helice");
       	  }
       });
 

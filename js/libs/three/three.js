@@ -7554,55 +7554,6 @@
      * }
      */
 
-
-
-      function ShaderMaterial2( parameters ) {
-
-        Material.call( this );
-    
-        this.fragmentShader = "void main() {}";
-        this.vertexShader = "void main() {}";
-        this.uniforms = {};
-        this.defines = {};
-        this.attributes = null;
-    
-        this.shading = THREE.SmoothShading;
-    
-        this.linewidth = 1;
-    
-        this.wireframe = false;
-        this.wireframeLinewidth = 1;
-    
-        this.fog = false; // set to use scene fog
-    
-        this.lights = false; // set to use scene lights
-    
-        this.vertexColors = THREE.NoColors; // set to use "color" attribute stream
-    
-        this.skinning = false; // set to use skinning attribute streams
-    
-        this.morphTargets = false; // set to use morph targets
-        this.morphNormals = false; // set to use morph normals
-    
-        // When rendered geometry doesn't include these attributes but the material does,
-        // use these default values in WebGL. This avoids errors when buffer data is missing.
-        this.defaultAttributeValues = {
-            "color" : [ 1, 1, 1],
-            "uv" : [ 0, 0 ],
-            "uv2" : [ 0, 0 ]
-        };
-    
-        // By default, bind position to attribute index 0. In WebGL, attribute 0
-        // should always be used to avoid potentially expensive emulation.
-        this.index0AttributeName = "position";
-    
-        this.setValues( parameters );
-    
-    };
-
-    ShaderMaterial2.prototype = Object.create( Material.prototype );
-    ShaderMaterial2.prototype.constructor = ShaderMaterial2;
-
     function ShaderMaterial( parameters ) {
 
     	Material.call( this );
@@ -28553,7 +28504,6 @@
     	SpriteMaterial: SpriteMaterial,
     	RawShaderMaterial: RawShaderMaterial,
     	ShaderMaterial: ShaderMaterial,
-        ShaderMaterial2: ShaderMaterial2,
     	PointsMaterial: PointsMaterial,
     	MultiMaterial: MultiMaterial,
     	MeshPhysicalMaterial: MeshPhysicalMaterial,
@@ -41677,7 +41627,6 @@
     exports.SpriteMaterial = SpriteMaterial;
     exports.RawShaderMaterial = RawShaderMaterial;
     exports.ShaderMaterial = ShaderMaterial;
-    exports.ShaderMaterial2 = ShaderMaterial2;
     exports.PointsMaterial = PointsMaterial;
     exports.MultiMaterial = MultiMaterial;
     exports.MeshPhysicalMaterial = MeshPhysicalMaterial;
