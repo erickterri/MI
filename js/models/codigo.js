@@ -203,15 +203,23 @@
 
 /////////pausa+fin del juego gracias al sin gasolina cuando sea true
 		if(escenario_inicio!=null && sin_gasolina!=true){
+			$(".loading").hide();
 			if(!pausar){
 			acciones(deltaTime);
+			////////Juego_Avanzando
+			$(".pausa_fondo").hide();
+			$(".perdiste_fondo").hide();
 		}
-			
+			else{
+			///////Juego_Pausado
+				$(".pausa_fondo").show();
+			}
 		}
-
+		else{
+			//////Juego_Perdido
+		$(".perdiste_fondo").show();
 		
-		
-		
+		}
 		
 
 		
@@ -223,21 +231,7 @@
 
 
 		
-		timer_toro+=2;
-		if(timer_toro>= 39){
-		timer_toro = 0;
-		}
-		timer_toro_mov+=.05;
-		if(timer_toro_mov>= 1200){
-		timer_toro_mov = 1200;
-		}
-		else{
-				
-	
-				
-				torito(timer_toro, timer_toro_mov, "toro_1", "toro_2", "toro_3", "toro_4", "toro_5");
-				//toro_clon("toro_1_c", "toro_2_c", "toro_3_c", "toro_4_c", "toro_5_c",timer_toro_mov, 60,"toro_1", "toro_2", "toro_3", "toro_4", "toro_5");
-		}
+		
 	
 	}
 
@@ -385,7 +379,24 @@
 		
 ////////////fin de gasolina
 
+//////////toros
 
+timer_toro+=2;
+		if(timer_toro>= 39){
+		timer_toro = 0;
+		}
+		timer_toro_mov+=.05;
+		if(timer_toro_mov>= 1200){
+		timer_toro_mov = 1200;
+		}
+		else{
+				
+	
+				
+				torito(timer_toro, timer_toro_mov, "toro_1", "toro_2", "toro_3", "toro_4", "toro_5");
+				//toro_clon("toro_1_c", "toro_2_c", "toro_3_c", "toro_4_c", "toro_5_c",timer_toro_mov, 60,"toro_1", "toro_2", "toro_3", "toro_4", "toro_5");
+		}
+///////////////fintoros
 
 		if(avion != undefined)
 		{
