@@ -41,6 +41,8 @@
 		renderer.setPixelRatio(visibleSize.width / visibleSize.height);
 		renderer.setSize(visibleSize.width, visibleSize.height);
 
+		
+
 		controls=new THREE.OrbitControls(camera,renderer.domElement);
 
 		luz();
@@ -77,6 +79,12 @@
 		render();
 		toro_clon(toro_1, toro_2, toro_3, toro_4, toro_5);
 	}
+
+	function shareFB(){
+		shareScore(puntos);
+	}
+
+	
 
 	function particulaHumo(textura) {
   	  
