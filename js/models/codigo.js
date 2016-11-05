@@ -20,6 +20,10 @@
 	var timer_toro_mov=0;
 	var timer_escenario = 0;
 	var posicion_toro=0;
+	var spotify = new THREE.Object3D();
+	spotify.name = "spotify"
+	var spotLight = new THREE.SpotLight( 0xffffff, 1 );
+
 	function init(){
 		var visibleSize = {width: window.innerWidth, height: window.innerHeight};
 		clock = new THREE.Clock();
@@ -38,9 +42,7 @@
 		controls=new THREE.OrbitControls(camera,renderer.domElement);
 
 		luz();
-		//geometrias();
-		//crear_plano();
-		//skybox();
+		ligthSpot();
 
 
 		
@@ -74,6 +76,37 @@
 		$("#scene-section").append(renderer.domElement);
 		render();
 		toro_clon(toro_1, toro_2, toro_3, toro_4, toro_5);
+	}
+
+	function ligthSpot(){
+				//var avion = scene.getObjectByName("empty");
+				spotLight.position.set(0, 0, 0);
+				//spotLight.target.position.set( avion.position.x, avion.position.y, avion.position.z);
+				spotLight.name = "spot"
+				spotLight.castShadow = true;
+				spotLight.angle = 0.41;
+				spotLight.penumbra = 1;
+				spotLight.decay = 2;
+				spotLight.distance = 200;
+				spotLight.shadow.mapSize.width = 1024;
+				spotLight.shadow.mapSize.height = 1024;
+				spotLight.shadow.camera.near = 1;
+				spotLight.shadow.camera.far = 200;
+
+				spotLight.color = new THREE.Color(0,1,0);
+				spotLight.intensity = 2;
+
+				//lightHelper = new THREE.SpotLightHelper( spotLight );
+
+				//avion.add(spotLight);
+				//avion.add(lightHelper);
+
+				spotify.add(spotLight);
+				//spotify.add(lightHelper);
+				spotify.position.set(0,0,-10);
+				scene.add(spotify);
+				//scene.add( spotLight );
+				//scene.add( lightHelper );
 	}
 
 	function skybox(){
@@ -324,6 +357,9 @@
 		var avion = scene.getObjectByName("avion");
 		var helice = scene.getObjectByName("helice");
 		var escenario = scene.getObjectByName("escenario");
+		var spot = scene.getObjectByName("spotify");
+		spot.position.x = 15;
+
 		escenario.rotation.y = THREE.Math.degToRad(timer_escenario);
 		timer_escenario-=0.1;
 		
@@ -441,7 +477,7 @@ timer_toro+=2;
 				if(gema != undefined){
 					var algo = avion.position.distanceTo(gema.position);
 					if(algo <= 2.5){
-						duplicarGemas(arrayGemas.length, 0);
+						duplicarGemas(arrayGemas.length, 10);
 						scene.remove( gema );
 						puntos += 1;
 						gasolina+=50;
@@ -528,8 +564,8 @@ timer_toro+=2;
 		if(gema != undefined){
 				arrayGemas.push(gema.clone());
 				arrayGemas[i].name = "gema" + i;
-				arrayGemas[i].position.z = 15 + posicion;
-				arrayGemas[i].position.y = Math.floor(Math.random() * 10) - 6;
+				arrayGemas[i].position.z = 15 + posicion + Math.floor(Math.random() * 25) - 6;
+				arrayGemas[i].position.y = Math.floor(Math.random() * 10) - 5;
 				scene.add(arrayGemas[i]);
 
 		}
@@ -543,12 +579,12 @@ timer_toro+=2;
           objLoader.setMaterials( materials );
           objLoader.setPath( 'modelos/41xph0z6k0xs-Diamond/' );
           objLoader.load( 'DiamondGem.obj', function ( object ) {
-          	object.position.set(-40,0,15);
+          	object.position.set(-40,0,30);
           	object.scale.set(0.1,0.1,0.1);
           	object.name="gema"
           	//empty.add(object);
             scene.add( object );
-            for (var i = 0; i < 5; i++) {
+            for (var i = 0; i < 8; i++) {
             	duplicarGemas(i, i+6);
 
             }
@@ -569,18 +605,11 @@ timer_toro+=2;
           	});
           	
           	object.name = nombre;
-          	object.position.z = posicionEjes[2]+1.8;
-          	object.position.y = posicionEjes[1]+0.2;
-          	object.position.x = posicionEjes[0];
-          	object.scale.x = escalaEjes[0];
-          	object.scale.y = escalaEjes[1];
-          	object.scale.z = escalaEjes[2];
-          	object.rotation.x = THREE.Math.degToRad(rotationEjes[0]);
-          	object.rotation.y = THREE.Math.degToRad(rotationEjes[1]);
-          	object.rotation.z = THREE.Math.degToRad(rotationEjes[2]);
+          	object.position.z = 190;
+          	object.position.y = 20;
           	//object.receiveShadow = true;
 			
-			var avion = scene.getObjectByName("empty");
+			var avion = scene.getObjectByName("avion");
           	avion.add(object);
       });
     }
