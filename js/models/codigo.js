@@ -23,6 +23,8 @@
 	var spotify = new THREE.Object3D();
 	spotify.name = "spotify"
 	var spotLight = new THREE.SpotLight( 0xffffff, 1 );
+	var humo;
+	var objectoHumo = new THREE.Object3D();
 
 	function init(){
 		var visibleSize = {width: window.innerWidth, height: window.innerHeight};
@@ -43,8 +45,6 @@
 
 		luz();
 		ligthSpot();
-
-
 		
 		var posicionEjes = [-40, 0, 0];
         var rotationEjes = [0,00,0];
@@ -77,6 +77,29 @@
 		render();
 		toro_clon(toro_1, toro_2, toro_3, toro_4, toro_5);
 	}
+
+	function particulaHumo(textura) {
+  	  
+  	  //objectoHumo.name="humo";
+  	  //var avion = scene.getObjectByName("avion");
+      //empty.add(objectoHumo);
+  	  scene.add(objectoHumo);
+  	  humo = new SpriteParticleSystem({
+  	    cloud:objectoHumo,
+  	    rate:5,
+  	    num:30,
+  	    texture:textura,
+  	    scaleR:[0.01,0.09],
+  	    speedR:[0,0.5],
+  	    rspeedR:[-0.1,0.3],
+  	    lifespanR:[3,4],
+  	    terminalSpeed:20
+  	  });
+  	  humo.addForce(new THREE.Vector3(0,0,-10));
+  	  objectoHumo.position.z = -1.1;
+  	  objectoHumo.position.x = -40;
+  	  humo.start();
+  	}
 
 	function ligthSpot(){
 				//var avion = scene.getObjectByName("empty");
@@ -126,87 +149,6 @@
         scene.add( skyBox );
 	}
 
-	function geometrias(){
-		var geometry = new THREE.BoxGeometry(5,0.5,1);
-		//var material = new THREE.MeshBasicMaterial({
-		var material = new THREE.MeshLambertMaterial({
-			color: new THREE.Color(0.4, 0, 0)
-		});
-
-		//var cube = new THREE.Mesh(geometry, material);
-		//cube.name = "cube1";
-		//scene.add(cube);		
-
-		material = new THREE.MeshPhongMaterial({
-			color: new THREE.Color(0.5,0.5,0.5),
-			specular: new THREE.Color(1,1,1),
-			shininess: 500
-		});
-
-		var cube = new THREE.Mesh(geometry, material);
-		cube.name = "cube";
-
-		var empty = new THREE.Object3D();
-		empty.name = "empty";
-		empty.add(cube);
-
-		var a = 0;
-		for(var i = 0; i < 4; i++)
-		{
-			var cube2 = cube.clone();
-			cube2.rotation.z = THREE.Math.degToRad(a);
-			empty.add(cube2);
-			a+=45;
-		}
-
-		var chain = new THREE.BoxGeometry(0.05,0.3,0.05);
-		material = new THREE.MeshLambertMaterial({
-			color: new THREE.Color(1, 0, 0)
-		});
-
-		var canasta = new THREE.BoxGeometry(0.4,0.2,0.4);
-
-		var angle = 0;
-		for(var i = 0; i < 8; i++)
-		{
-			var palo = new THREE.Mesh(chain, material);
-			palo.position.z = 1.2;
-			palo.position.x = Math.sin(THREE.Math.degToRad(angle)) * 2;
-			palo.position.y = Math.cos(THREE.Math.degToRad(angle)) * 2;
-			palo.name = "chain" + i;
-			empty.add(palo);
-			angle+=45;
-
-			var canasta2 = new THREE.Mesh(canasta, material);
-			canasta2.position.y -= .2;
-			palo.add(canasta2);
-		}
-		scene.add(empty);
-	}
-
-	function crear_plano(){
-         //Geometría del plano
-         Textura_plano = new THREE.ImageUtils.loadTexture('texturas/cesped.jpg');
-         Geometria_plano=new THREE.PlaneGeometry(100,100,10,10);
-         //Textura
-         Textura_plano.wrapS=Textura_plano.wrapT=THREE.RepeatWrapping;
-         Textura_plano.repeat.set(10,10);
-         // Material y agregado la textura
-         Material_plano=new THREE.MeshBasicMaterial({map:Textura_plano,side:THREE.DoubleSide});
-         // El plano (Territorio)
-         Territorio=new THREE.Mesh(Geometria_plano,Material_plano);
-         //Territorio.rotation.x=Math.PI/2;
-         Territorio.rotation.x=4.6;
-         Territorio.receiveShadow=true;
-         Territorio.scale.x = 1;
-         Territorio.scale.y = 1;
-         Territorio.scale.z = 1;
-         Territorio.position.y = -5;
-         scene.add(Territorio);
-         Axis=new THREE.AxisHelper(100,100,100);
-         scene.add(Axis);
-     }
-
 	function luz(){
 		var ambientLight = new THREE.AmbientLight(new THREE.Color(1,1,1), 1);
 		scene.add(ambientLight);
@@ -222,6 +164,9 @@
 		var escenario_inicio = scene.getObjectByName("escenario");
 		var nubes1 = scene.getObjectByName("nubes1");
 		var deltaTime = clock.getDelta();
+
+		if (humo)
+      		humo.update(deltaTime);
 
 		requestAnimationFrame(render);
 		controls.update();
@@ -384,8 +329,11 @@
 			if(avion.position.y>=-4){
 				
 				avion.position.y -= 7 * deltaTime;
-				avion.rotation.x += THREE.Math.degToRad(35 * deltaTime);
+				avion.rotation.x += THREE.Math.degToRad(10 * deltaTime);
 				camera.position.y -= 7 * deltaTime;
+				objectoHumo.position.y -= 6.5 * deltaTime;
+				objectoHumo.rotation.x += THREE.Math.degToRad(20 * deltaTime);
+				objectoHumo.visible = false;
 				
 				}
 				else
@@ -457,12 +405,16 @@ timer_toro+=2;
 
 			if(teclado.pressed("w")){
 				avion.position.y += 7 * deltaTime;
-				avion.rotation.x -= THREE.Math.degToRad(35 * deltaTime);
+				avion.rotation.x -= THREE.Math.degToRad(10 * deltaTime);
 				camera.position.y += 7 * deltaTime;
+				objectoHumo.position.y += 6.5 * deltaTime;
+				objectoHumo.rotation.x -= THREE.Math.degToRad(20 * deltaTime);
 			} else if(teclado.pressed("s") && colision_piso==false){
 				avion.position.y -= 7 * deltaTime;
-				avion.rotation.x += THREE.Math.degToRad(35 * deltaTime);
+				avion.rotation.x += THREE.Math.degToRad(10 * deltaTime);
 				camera.position.y -= 7 * deltaTime;
+				objectoHumo.position.y -= 6.5 * deltaTime;
+				objectoHumo.rotation.x += THREE.Math.degToRad(20 * deltaTime);
 			}
 
 
@@ -532,10 +484,16 @@ timer_toro+=2;
           object.rotation.y = THREE.Math.degToRad(rotationEjes[1]);
           object.rotation.z = THREE.Math.degToRad(rotationEjes[2]);
           //object.receiveShadow = true; 
-          empty.add(object);   
-          scene.add( empty );
+          
           if(nombre == "avion"){
+          	empty.add(object);   
+          scene.add( empty );
           		modeloOBJ2("modelos/avion/Avioneta.jpg", "modelos/avion/helice_avioneta.obj", posicionEjes, rotationEjes, escalaEjes, "helice");
+      	  		THREE.ImageUtils.loadTexture( "images/smoke.png", undefined, particulaHumo );
+      	  }
+      	  else
+      	  {
+      	  	scene.add( object );
       	  }
       });
 
