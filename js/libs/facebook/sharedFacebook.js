@@ -16,9 +16,9 @@
 
     function shareScore(score){
       FB.ui({
-        method: 'feed',
-        picture:'http://i.imgur.com/QmPZdkH.jpg',
-        link:'http://miadventure.x10.mx/',
+        method: 'share',
+        picture:'http://miadventure.x10.mx/portadaMI2.png',
+        href:'http://miadventure.x10.mx/',
         caption: 'MI Adventure: African Adventure',
         quote: "My Score: " + score,
         hashtag: "#MiAdventure"
