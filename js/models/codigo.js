@@ -11,6 +11,7 @@
 	var arrayGemas = [];
 	var arrayGasoline = [];
 	var arrayToros = [];
+	var arrayNubes = [];
 	var pausar = false;
 	var sin_gasolina = false;
 	var colision_piso = false;
@@ -29,12 +30,17 @@
 	var objectoHumo = new THREE.Object3D();
 	var soundFondo;
 	var sound4;
+	var soundChoqueSuelo;
+	var soundChoqueNube;
 	var soundSinGas;
 	var rayCaster = new THREE.Raycaster();
 	var temp;
 	var temp2;
 	var audioListo = false;
 	var continuar = true;
+	var skyMat;
+	var mostrar = false;
+	var contador = 0;
 
 	function init(){
 		var visibleSize = {width: window.innerWidth, height: window.innerHeight};
@@ -43,7 +49,7 @@
 		camera = new THREE.PerspectiveCamera(75, visibleSize.width / visibleSize.height, 0.1, 150);
 		//camera.rotation.x = THREE.Math.degToRad(-15);
 		camera.position.x = -50.857240520821916;
-		camera.position.y = 0.7907654787042946;
+		camera.position.y = 5.7907654787042946;
 		camera.position.z = 2.7377030939659686;
 
 		var listener = new THREE.AudioListener();
@@ -73,6 +79,20 @@
 				soundSinGas.setVolume(0.8);
 			});
 
+		soundChoqueSuelo = new THREE.Audio( listener );
+			audioLoader.load( 'sounds/Crash.ogg', function( buffer ) {
+				soundChoqueSuelo.setBuffer( buffer );
+				soundChoqueSuelo.setLoop(false);
+				soundChoqueSuelo.setVolume(0.8);
+			});
+
+		soundChoqueNube = new THREE.Audio( listener );
+			audioLoader.load( 'sounds/Crash_Impact_Sweetener.ogg', function( buffer ) {
+				soundChoqueNube.setBuffer( buffer );
+				soundChoqueNube.setLoop(false);
+				soundChoqueNube.setVolume(2);
+			});
+
 		skybox();
 
 		var container = document.getElementById( 'scene-section' );
@@ -88,12 +108,13 @@
 		//luz();
 		ligthSpot();
 		
-		var posicionEjes = [-40, 0, 0];
+		var posicionEjes = [-40, 5, 0];
         var rotationEjes = [0,00,0];
         var escalaEjes = [0.01,0.01,0.01];
         modeloOBJ("modelos/avion/Avioneta.jpg", "modelos/avion/Avioneta_pivot.obj", posicionEjes, rotationEjes, escalaEjes, "avion");   
         modeloOBJ("modelos/esc.jpg", "modelos/escenario.obj", [10, -10, 0],  [0, 0, 0], [0.01,0.01,0.01], "escenario");
         modeloOBJ("modelos/nubes/nubes.jpg", "modelos/nubes/nubes1.obj", [10, 0, 0],  [0, 160, 0], [0.008,0.01,0.008], "nubes1");
+        modeloOBJ("modelos/nubes/nubes.jpg", "modelos/Gasoline_Canister/gasolina.obj", [-40, 0, 30],  [0, 0, 0], [0.08,0.08,0.08], "nubesColision");
        /* modeloOBJ("modelos/nubes/nubes.jpg", "modelos/nubes/nubes1.obj", [10, -17, 0],  [0, 0, 0], [0.01,0.01,0.01], "nubes1_copy");
         modeloOBJ("modelos/nubes/nubes.jpg", "modelos/nubes/nubes1.obj", [10, 6, 0],  [0, 0, 0], [0.005,0.01,0.005], "nubes1_copy2");
         modeloOBJ("modelos/nubes/nubes.jpg", "modelos/nubes/nubes2.obj", [10, -13, 0],  [0, 0, 0], [0.01,0.01,0.01], "nubes2");
@@ -110,8 +131,9 @@
         mtlLoader.setPath( 'modelos/sky/' );
         mtlLoader.load( 'sky.mtl', modeloOBJMTLCielo);
 
- 		mtlLoader.setPath( 'modelos/Gasoline_Canister/' );
-        mtlLoader.load( 'Gasoline_Canister.mtl', modeloOBJMTL2);
+        modeloOBJ("modelos/Gasoline_Canister/Jerry_Can_Green.jpg", "modelos/Gasoline_Canister/gasolina.obj", [-40, 0, 30],  [0, 210, 0], [0.08,0.08,0.08], "gasoline");
+ 		//mtlLoader.setPath( 'modelos/Gasoline_Canister/' );
+        //mtlLoader.load( 'Gasoline_Canister.mtl', modeloOBJMTL2);
 
         mtlLoader.setPath( 'modelos/41xph0z6k0xs-Diamond/' );
         mtlLoader.load( 'DiamondGem.mtl', modeloOBJMTL);
@@ -182,6 +204,9 @@
 
 		var dirLight, hemiLight;
 
+		var ambientLight = new THREE.AmbientLight(new THREE.Color(1,1,1), 0.2);
+		scene.add(ambientLight);
+
 		hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 0.6 );
 		hemiLight.color.setHSL( 0.6, 1, 0.6 );
 		hemiLight.groundColor.setHSL( 0.095, 1, 0.75 );
@@ -234,7 +259,7 @@
 		scene.fog.color.copy( uniforms.bottomColor.value );
 
 		var skyGeo = new THREE.SphereGeometry( 4000, 32, 15 );
-		var skyMat = new THREE.ShaderMaterial( { vertexShader: vertexShader, fragmentShader: fragmentShader, uniforms: uniforms, side: THREE.BackSide } );
+		skyMat = new THREE.ShaderMaterial( { vertexShader: vertexShader, fragmentShader: fragmentShader, uniforms: uniforms, side: THREE.BackSide } );
 
 		var sky = new THREE.Mesh( skyGeo, skyMat );
 		scene.add( sky );
@@ -281,8 +306,15 @@
 			}
 		}
 		else{
+
+			contador +=  1*deltaTime;
+			if(contador >= 2)
+			{
+				mostrar = true;
+			}
 			//////Juego_Perdido
-			$(".perdiste_fondo").show();
+			if(mostrar)
+				$(".perdiste_fondo").show();
 			$(".pausa").hide();
 			if(sound4.isPlaying)
 				sound4.stop();
@@ -370,6 +402,7 @@
 		objectoHumo.position.y = 0;
 		objectoHumo.rotation.x = 0;
 		timer_toro_mov = 0;
+		continuar = true;
 		sound4.play();	
 		
 	}
@@ -387,7 +420,7 @@
 		
 		//timer_escenario-=0.1;
 		if(nubes1)
-			nubes1.rotation.y = THREE.Math.degToRad(8/2 * deltaTime);
+			nubes1.rotation.y -= THREE.Math.degToRad(8 * deltaTime);
 
 
 /////////colision_avion
@@ -434,6 +467,7 @@
 			}
 			else
 			{
+				soundChoqueSuelo.play();
 				avion.position.y = avion.position.y;
 				avion.rotation.x = avion.rotation.x;
 				avion.rotation.z = avion.rotation.x;
@@ -496,21 +530,53 @@
 					camera.position.y += 7 * deltaTime;
 					objectoHumo.position.y += 6.5 * deltaTime;
 					objectoHumo.rotation.x -= THREE.Math.degToRad(20 * deltaTime);
-				} else if(teclado.pressed("s") && colision_piso==false){
+				} else{
+					if(iniciar)
+					{
+						avion.position.y -= 3 * deltaTime;
+						//avion.rotation.x += THREE.Math.degToRad(10 * deltaTime);
+						camera.position.y -= 3 * deltaTime;
+						objectoHumo.position.y -= 2.5 * deltaTime;
+						//objectoHumo.rotation.x += THREE.Math.degToRad(20 * deltaTime);
+					}
+					else{
+						avion.position.y -= 3 * deltaTime;
+						//avion.rotation.x += THREE.Math.degToRad(10 * deltaTime);
+						camera.position.y -= 3 * deltaTime;
+						objectoHumo.position.y -= 2.5 * deltaTime;
+						//objectoHumo.rotation.x += THREE.Math.degToRad(20 * deltaTime);
+					}
+					
+				}
+
+				/*else if(teclado.pressed("s") && colision_piso==false){
 					avion.position.y -= 7 * deltaTime;
 					avion.rotation.x += THREE.Math.degToRad(10 * deltaTime);
 					camera.position.y -= 7 * deltaTime;
 					objectoHumo.position.y -= 6.5 * deltaTime;
 					objectoHumo.rotation.x += THREE.Math.degToRad(20 * deltaTime);
-				}
+				}*/
 
 				if(avion.position.y >= 21)
 				{
-					avion.position.y = 21;
+					if(avion.position.y<21)
+						avion.position.y += 7*deltaTime;
+					else
+						avion.position.y = 21;
+
 					camera.position.y = 22.5;
-					objectoHumo.position.y = 20;
-					avion.rotation.x = temp;
-					objectoHumo.rotation.x = temp2;
+
+					if(objectoHumo.position.y<21)
+						objectoHumo.position.y += 6.5*deltaTime;
+					else
+						objectoHumo.position.y = 21;
+
+					if(avion.rotation.x <= 0){
+						avion.rotation.x += THREE.Math.degToRad(5);
+					}
+					if(objectoHumo.rotation.x <= 0){
+						objectoHumo.rotation.x += THREE.Math.degToRad(5);
+					}
 				}
 				else
 				{
@@ -529,7 +595,8 @@
 						$(".perdiste_fondo").show();
 						if(sound4.isPlaying)
 							sound4.stop();
-						sin_gasolina = true;
+						gasolina = 0;
+						document.getElementById("id_gasolina").style.width = (100*gasolina)/100 ;
 					}
 				}
 			}
@@ -550,12 +617,41 @@
 							scene.remove( gema );
 							puntos += 1;
 							//gasolina+=50;
-							console.log(puntos);
+							//console.log(puntos);
 						}
 	
 						if(gema.position.z <= -25){
 							duplicarGemas(arrayGemas.length, 10);
 							scene.remove( gema );
+						}
+					}
+				}
+			}
+
+			for (var i = 0; i < arrayNubes.length; i++) {
+				var nubesColision = scene.getObjectByName("nubesColision" + i);
+				if(nubesColision != undefined)
+				{
+					nubesColision.position.z -= 5 * deltaTime;
+					nubesColision.rotation.y -= THREE.Math.degToRad(35 * deltaTime);
+				}
+				
+				if(continuar){
+					if(nubesColision != undefined){
+						var algo = avion.position.distanceTo(nubesColision.position);
+						if(algo <= 2.5){
+							duplicarNubes(arrayNubes.length, 10);
+							scene.remove( nubesColision );
+							//puntos += 1;
+							gasolina-=30;
+							document.getElementById("id_gasolina").style.width = (100*gasolina)/100 ;
+							//console.log(puntos);
+							soundChoqueNube.play();
+						}
+	
+						if(nubesColision.position.z <= -25){
+							duplicarNubes(arrayNubes.length, 10);
+							scene.remove( nubesColision );
 						}
 					}
 				}
@@ -646,8 +742,13 @@
      		modeloOBJ2("modelos/avion/Avioneta.jpg", "modelos/avion/helice_avioneta.obj", posicionEjes, rotationEjes, escalaEjes, "helice");
      		THREE.ImageUtils.loadTexture( "images/smoke.png", undefined, particulaHumo );
      	}
-     	else
-     	{
+     	else if(nombre == "nubesColision"){
+     		scene.add( object );
+     		for (var i = 0; i < 4; i++) {
+         		duplicarNubes(i, i+6);
+         	}
+     	}
+     	else{
      		scene.add( object );
      	}
       });
@@ -671,6 +772,44 @@
 			scene.add(arrayGemas[i]);
 		}
 	}
+
+	function duplicarNubes(i, posicion)
+	{
+		var nubesColision = scene.getObjectByName("nubesColision");
+		if(nubesColision != undefined){
+			arrayNubes.push(nubesColision.clone());
+			arrayNubes[i].name = "nubesColision" + i;
+			arrayNubes[i].position.z = 15 + posicion + Math.floor(Math.random() * 25) - 6;
+			arrayNubes[i].position.y = Math.floor(Math.random() * 20) + 2;
+			scene.add(arrayNubes[i]);
+		}
+	}
+
+	 function modeloOBJGasolina(textura, modelo, posicionEjes, rotationEjes, escalaEjes, nombre) {
+      var terrainTexture = new THREE.ImageUtils.loadTexture(textura);
+      var materialTerrain = new THREE.MeshLambertMaterial({ map: terrainTexture, side: THREE.DoubleSide });
+      loader = new THREE.OBJLoader();
+      loader.load(modelo, function ( object ) {
+      	object.traverse( function ( child ) {
+            if ( child instanceof THREE.Mesh ) {
+                child.material.map = terrainTexture;
+            }
+      	});
+          
+     	object.name = nombre;
+     	object.position.z = posicionEjes[2];
+     	object.position.y = posicionEjes[1];
+     	object.position.x = posicionEjes[0];
+     	object.scale.x = escalaEjes[0];
+     	object.scale.y = escalaEjes[1];
+     	object.scale.z = escalaEjes[2];
+     	object.rotation.x = THREE.Math.degToRad(rotationEjes[0]);
+     	object.rotation.y = THREE.Math.degToRad(rotationEjes[1]);
+     	object.rotation.z = THREE.Math.degToRad(rotationEjes[2]);
+     	//object.receiveShadow = true; 
+     	scene.add( object );
+      });
+   }
  
     function modeloOBJMTL(materials){
        materials.preload();
@@ -719,12 +858,16 @@
         objLoader.setMaterials( materials );
         objLoader.setPath( 'modelos/sky/' );
         objLoader.load( 'sky.obj', function ( object ) {
-        	object.position.set(80,0,0);
+        	object.position.set(80,-50,0);
         	object.scale.set(2,2,2);
         	object.rotation.z = THREE.Math.degToRad(90);
         	object.name="sky"
         	//empty.add(object);
           scene.add( object );
+          var cielitolindo = object.clone();
+          cielitolindo.rotation.z = THREE.Math.degToRad(0);
+          cielitolindo.position.y = -15;
+          scene.add(cielitolindo);
         });
     }
 
