@@ -15,6 +15,7 @@
 	var sin_gasolina = false;
 	var colision_piso = false;
 	var validar_clon = true;
+	var reiniciar = false;
 	var puntos = 0;
 	var gasolina = 400;
 	var timer_toro=0;
@@ -26,6 +27,7 @@
 	var spotLight = new THREE.SpotLight( 0xffffff, 1 );
 	var humo;
 	var objectoHumo = new THREE.Object3D();
+
 
 	function init(){
 		var visibleSize = {width: window.innerWidth, height: window.innerHeight};
@@ -266,13 +268,25 @@
 		}
 			else{
 			///////Juego_Pausado
+				
+				$("#reiniciar_p").click(function() {
+                reiniciar_juego();
+                
+
+            });  
 				$(".pausa_fondo").show();
 			}
 		}
 		else{
 			//////Juego_Perdido
 		$(".perdiste_fondo").show();
+		$("#reiniciar_r").click(function() {
+                reiniciar_juego();
+            });  
+		if(reiniciar==true){
+		reiniciar_juego();
 		
+		}
 		}
 	
 	}
@@ -352,15 +366,30 @@
 
 	};
 	
-
+	function reiniciar_juego(){
+		
+		var escenario = scene.getObjectByName("escenario");
+		var avion = scene.getObjectByName("avion");
+		$(".pausa_fondo").hide();
+		$(".perdiste_fondo").hide();
+		reiniciar=false;
+		sin_gasolina=false;
+		pausar=false;
+		gasolina=400;
+		escenario.rotation.y = -10;
+		avion.position.y = 0;
+		camera.position.x = -50.857240520821916;
+		camera.position.y = 0.7907654787042946;
+		camera.position.z = 2.7377030939659686;	
+		avion.rotation.x = 0;
+		objectoHumo.position.y = 0;
+		objectoHumo.rotation.x = 0;
+		timer_toro_mov = 0;		
+		
+	}
 	function acciones(deltaTime)
 	{
-		/*var cube1 = scene.getObjectByName("empty");
-		cube1.rotation.z -= THREE.Math.degToRad(100 * deltaTime);
-		for(var i = 0; i<8; i++){
-			var cube3 = scene.getObjectByName("chain"+i);
-			cube3.rotation.z += THREE.Math.degToRad(100 * deltaTime);
-		}*/
+		
 
 		
 		var avion = scene.getObjectByName("avion");
@@ -370,7 +399,8 @@
 		var spot = scene.getObjectByName("spotify");
 		spot.position.x = 15;
 
-		escenario.rotation.y -= THREE.Math.degToRad(6 * deltaTime);
+		escenario.rotation.y -= THREE.Math.degToRad(2 * deltaTime);
+		
 		//timer_escenario-=0.1;
 		if(nubes1)
 		nubes1.rotation.y = THREE.Math.degToRad(8/2 * deltaTime);
@@ -431,7 +461,7 @@
 
 //////////toros
 
-timer_toro+=2;
+timer_toro+=10;
 		if(timer_toro>= 39){
 		timer_toro = 0;
 		}
@@ -548,6 +578,10 @@ timer_toro+=2;
 	$(document).keydown(function(e) {
         if(e.key == "p"){
             pausarJuego();
+        }
+         if(e.key == "r" && sin_gasolina==true){
+        	alert("hola");
+            reiniciar = true;
         }
     });
 
