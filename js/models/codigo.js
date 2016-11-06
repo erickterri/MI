@@ -41,6 +41,11 @@
 	var skyMat;
 	var mostrar = false;
 	var contador = 0;
+	var conteo = 0;
+	var iniciar = false;
+	var movimientoInicial = true;
+	var rotarAvion = true;
+	var rotarHumo = true;
 
 	function init(){
 		var visibleSize = {width: window.innerWidth, height: window.innerHeight};
@@ -108,7 +113,7 @@
 		//luz();
 		ligthSpot();
 		
-		var posicionEjes = [-40, 5, 0];
+		var posicionEjes = [-40, 4, 0];
         var rotationEjes = [0,00,0];
         var escalaEjes = [0.01,0.01,0.01];
         modeloOBJ("modelos/avion/Avioneta.jpg", "modelos/avion/Avioneta_pivot.obj", posicionEjes, rotationEjes, escalaEjes, "avion");   
@@ -163,6 +168,7 @@
   	  });
   	  humo.addForce(new THREE.Vector3(0,0,-10));
   	  objectoHumo.position.z = -1.1;
+  	  objectoHumo.position.y = 4;
   	  objectoHumo.position.x = -40;
   	  humo.start();
   	}
@@ -476,8 +482,6 @@
 				sin_gasolina=true;
 			}
 		}
-		
-		gasolina-=2;
 
 		//document.getElementById("id_gasolina").innerHTML = gasolina;
 		document.getElementById("id_gasolina").style.width = (100*gasolina)/100 ;
@@ -524,31 +528,52 @@
 			
 			if(continuar)
 			{
-				if(teclado.pressed("w")){
-					avion.position.y += 7 * deltaTime;
-					avion.rotation.x -= THREE.Math.degToRad(10 * deltaTime);
-					camera.position.y += 7 * deltaTime;
-					objectoHumo.position.y += 6.5 * deltaTime;
-					objectoHumo.rotation.x -= THREE.Math.degToRad(20 * deltaTime);
-				} else{
-					if(iniciar)
+				if(iniciar)
+				{
+					gasolina-=2;
+
+					if(teclado.pressed("space")){
+						avion.position.y += 10 * deltaTime;
+						avion.rotation.x -= THREE.Math.degToRad(30 * deltaTime);
+						camera.position.y += 10 * deltaTime;
+						objectoHumo.position.y += 9.8 * deltaTime;
+						objectoHumo.rotation.x -= THREE.Math.degToRad(30 * deltaTime);
+					} else{
+						avion.position.y -= 6 * deltaTime;
+						if(avion.rotation.x <= 0.5)
+							avion.rotation.x += THREE.Math.degToRad(20 * deltaTime);
+						camera.position.y -= 6 * deltaTime;
+						objectoHumo.position.y -= 5.9 * deltaTime;
+						if(objectoHumo.rotation.x <= 0.5)
+							objectoHumo.rotation.x += THREE.Math.degToRad(30 * deltaTime);
+					}
+				}
+				else
+				{
+					conteo += 1*deltaTime;
+					if(conteo >= 5)
+						iniciar = true;
+					
+					if(avion.position.y >= 4.5){
+						movimientoInicial = false;
+					}else if(avion.position.y <= 4)
+					{
+						movimientoInicial = true;
+					}
+
+					if(movimientoInicial){
+						avion.position.y += 3 * deltaTime;
+						camera.position.y += 3 * deltaTime;
+						objectoHumo.position.y += 2.5 * deltaTime;
+					}else
 					{
 						avion.position.y -= 3 * deltaTime;
-						//avion.rotation.x += THREE.Math.degToRad(10 * deltaTime);
 						camera.position.y -= 3 * deltaTime;
 						objectoHumo.position.y -= 2.5 * deltaTime;
-						//objectoHumo.rotation.x += THREE.Math.degToRad(20 * deltaTime);
-					}
-					else{
-						avion.position.y -= 3 * deltaTime;
-						//avion.rotation.x += THREE.Math.degToRad(10 * deltaTime);
-						camera.position.y -= 3 * deltaTime;
-						objectoHumo.position.y -= 2.5 * deltaTime;
-						//objectoHumo.rotation.x += THREE.Math.degToRad(20 * deltaTime);
 					}
 					
+					
 				}
-
 				/*else if(teclado.pressed("s") && colision_piso==false){
 					avion.position.y -= 7 * deltaTime;
 					avion.rotation.x += THREE.Math.degToRad(10 * deltaTime);
