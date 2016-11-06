@@ -20,7 +20,7 @@
         picture:'http://i.imgur.com/QmPZdkH.jpg',
         link:'http://miadventure.x10.mx/',
         caption: 'MI Adventure: TripTime African Adventure',
-        quote: "Mi puntuación: " + score,
+        quote: "My Score: " + score,
         hashtag: "#MiAdventure"
       }, function(response){});
   }

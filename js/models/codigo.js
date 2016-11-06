@@ -1,7 +1,7 @@
 	var scene;
 	var camera;
 	var renderer;
-	
+	var	stats = new Stats();
 	var clock;
 	var controls;
 	var mtlLoader = new THREE.MTLLoader();
@@ -9,6 +9,7 @@
 	empty.name = "empty";
 	var teclado=new THREEx.KeyboardState();
 	var arrayGemas = [];
+	var arrayGasoline = [];
 	var arrayToros = [];
 	var pausar = false;
 	var sin_gasolina = false;
@@ -36,16 +37,21 @@
 		camera.position.y = 0.7907654787042946;
 		camera.position.z = 2.7377030939659686;
 
+		skybox();
+
+		var container = document.getElementById( 'scene-section' );
 		renderer = new THREE.WebGLRenderer();
-		renderer.setClearColor(new THREE.Color(0.1,0,0.2));
+		//renderer.setClearColor(new THREE.Color(0.1,0,0.2));
+		renderer.setClearColor( scene.fog.color );
 		renderer.setPixelRatio(visibleSize.width / visibleSize.height);
 		renderer.setSize(visibleSize.width, visibleSize.height);
+		container.appendChild( renderer.domElement );
 
-		
+
 
 		controls=new THREE.OrbitControls(camera,renderer.domElement);
 
-		luz();
+		//luz();
 		ligthSpot();
 		
 		var posicionEjes = [-40, 0, 0];
@@ -70,11 +76,17 @@
 
 
         THREE.Loader.Handlers.add( /\.dds$/i, new THREE.DDSLoader() );
+
+ mtlLoader.setPath( 'modelos/Gasoline_Canister/' );
+        mtlLoader.load( 'Gasoline_Canister.mtl', modeloOBJMTL2);
+
         mtlLoader.setPath( 'modelos/41xph0z6k0xs-Diamond/' );
         mtlLoader.load( 'DiamondGem.mtl', modeloOBJMTL);
 
+        
 
-		
+
+		//container.appendChild( stats.dom );
 		$("#scene-section").append(renderer.domElement);
 		render();
 		toro_clon(toro_1, toro_2, toro_3, toro_4, toro_5);
@@ -124,8 +136,8 @@
 				spotLight.shadow.camera.near = 1;
 				spotLight.shadow.camera.far = 200;
 
-				spotLight.color = new THREE.Color(0,1,0);
-				spotLight.intensity = 2;
+				spotLight.color = new THREE.Color(1,0,0);
+				spotLight.intensity = 5;
 
 				//lightHelper = new THREE.SpotLightHelper( spotLight );
 
@@ -134,27 +146,81 @@
 
 				spotify.add(spotLight);
 				//spotify.add(lightHelper);
-				spotify.position.set(0,0,-10);
+				spotify.position.set(0,50,0);
 				scene.add(spotify);
 				//scene.add( spotLight );
 				//scene.add( lightHelper );
 	}
 
 	function skybox(){
-		var imagePrefix = "images/dawnmountain-";
-        var directions  = ["xpos", "xneg", "ypos", "yneg", "zpos", "zneg"];
-        var imageSuffix = ".png";
-        var skyGeometry = new THREE.CubeGeometry( 5000, 5000, 5000 ); 
-        
-        var materialArray = [];
-        for (var i = 0; i < 6; i++)
-          materialArray.push( new THREE.MeshBasicMaterial({
-            map: THREE.ImageUtils.loadTexture( imagePrefix + directions[i] + imageSuffix ),
-            side: THREE.BackSide
-          }));
-        var skyMaterial = new THREE.MeshFaceMaterial( materialArray );
-        skyBox = new THREE.Mesh( skyGeometry, skyMaterial );
-        scene.add( skyBox );
+		scene.fog = new THREE.Fog( 0xffffff, 1, 5000 );
+		scene.fog.color.setHSL( 0.6, 0, 1 );
+
+		var dirLight, hemiLight;
+		// LIGHTS
+
+		hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 0.6 );
+		hemiLight.color.setHSL( 0.6, 1, 0.6 );
+		hemiLight.groundColor.setHSL( 0.095, 1, 0.75 );
+		hemiLight.position.set( 0, 500, 0 );
+		scene.add( hemiLight );
+
+		//
+
+		dirLight = new THREE.DirectionalLight( 0xffffff, 1 );
+		dirLight.color.setHSL( 0.1, 1, 0.95 );
+		dirLight.position.set( -1, 1.75, 1 );
+		dirLight.position.multiplyScalar( 50 );
+		scene.add( dirLight );
+
+		dirLight.castShadow = true;
+
+		dirLight.shadowMapWidth = 2048;
+		dirLight.shadowMapHeight = 2048;
+
+		var d = 50;
+
+		dirLight.shadowCameraLeft = -d;
+		dirLight.shadowCameraRight = d;
+		dirLight.shadowCameraTop = d;
+		dirLight.shadowCameraBottom = -d;
+
+		dirLight.shadowCameraFar = 3500;
+		dirLight.shadowBias = -0.0001;
+		//dirLight.shadowCameraVisible = true;
+
+		// GROUND
+
+		var groundGeo = new THREE.PlaneBufferGeometry( 10000, 10000 );
+		var groundMat = new THREE.MeshPhongMaterial( { color: 0xffffff, specular: 0x050505 } );
+		groundMat.color.setHSL( 0.095, 1, 0.75 );
+
+		var ground = new THREE.Mesh( groundGeo, groundMat );
+		ground.rotation.x = -Math.PI/2;
+		ground.position.y = -33;
+		scene.add( ground );
+
+		ground.receiveShadow = true;
+
+		// SKYDOME
+
+		var vertexShader = document.getElementById( 'vertexShader' ).textContent;
+		var fragmentShader = document.getElementById( 'fragmentShader' ).textContent;
+		var uniforms = {
+			topColor:    { value: new THREE.Color( 0x0077ff ) },
+			bottomColor: { value: new THREE.Color( 0x08b0b0 ) },
+			offset:      { value: 33 },
+			exponent:    { value: 0.6 }
+		};
+		uniforms.topColor.value.copy( hemiLight.color );
+
+		scene.fog.color.copy( uniforms.bottomColor.value );
+
+		var skyGeo = new THREE.SphereGeometry( 4000, 32, 15 );
+		var skyMat = new THREE.ShaderMaterial( { vertexShader: vertexShader, fragmentShader: fragmentShader, uniforms: uniforms, side: THREE.BackSide } );
+
+		var sky = new THREE.Mesh( skyGeo, skyMat );
+		scene.add( sky );
 	}
 
 	function luz(){
@@ -172,9 +238,9 @@
 		var escenario_inicio = scene.getObjectByName("escenario");
 		var nubes1 = scene.getObjectByName("nubes1");
 		var deltaTime = clock.getDelta();
+		stats.update();
 
-		if (humo)
-      		humo.update(deltaTime);
+		
 
 		requestAnimationFrame(render);
 		controls.update();
@@ -195,6 +261,8 @@
 			////////Juego_Avanzando
 			$(".pausa_fondo").hide();
 			$(".perdiste_fondo").hide();
+			if (humo)
+      			humo.update(deltaTime);
 		}
 			else{
 			///////Juego_Pausado
@@ -206,18 +274,6 @@
 		$(".perdiste_fondo").show();
 		
 		}
-		
-
-		
-
-		
-		
-		nubes1.rotation.y = THREE.Math.degToRad(timer_escenario/2);
-
-
-
-		
-		
 	
 	}
 
@@ -310,12 +366,14 @@
 		var avion = scene.getObjectByName("avion");
 		var helice = scene.getObjectByName("helice");
 		var escenario = scene.getObjectByName("escenario");
+		var nubes1 = scene.getObjectByName("nubes1");
 		var spot = scene.getObjectByName("spotify");
 		spot.position.x = 15;
 
-		escenario.rotation.y = THREE.Math.degToRad(timer_escenario);
-		timer_escenario-=0.1;
-		
+		escenario.rotation.y -= THREE.Math.degToRad(6 * deltaTime);
+		//timer_escenario-=0.1;
+		if(nubes1)
+		nubes1.rotation.y = THREE.Math.degToRad(8/2 * deltaTime);
 
 
 /////////colision_avion
@@ -430,7 +488,7 @@ timer_toro+=2;
 				var gema = scene.getObjectByName("gema" + i);
 				if(gema != undefined)
 				{
-					gema.position.z -= 2 * deltaTime;
+					gema.position.z -= 5 * deltaTime;
 					gema.rotation.y -= THREE.Math.degToRad(35 * deltaTime);
 				}
 	
@@ -440,13 +498,38 @@ timer_toro+=2;
 						duplicarGemas(arrayGemas.length, 10);
 						scene.remove( gema );
 						puntos += 1;
-						gasolina+=50;
+						//gasolina+=50;
 						console.log(puntos);
 					}
 
-					if(gema.position.z <= -39){
-						duplicarGemas(arrayGemas.length, 0);
+					if(gema.position.z <= -25){
+						duplicarGemas(arrayGemas.length, 10);
 						scene.remove( gema );
+					}
+				}
+			}
+
+			for (var i = 0; i < arrayGasoline.length; i++) {
+				var gasoline = scene.getObjectByName("gasoline" + i);
+				if(gasoline != undefined)
+				{
+					gasoline.position.z -= 5 * deltaTime;
+					gasoline.rotation.y -= THREE.Math.degToRad(35 * deltaTime);
+				}
+	
+				if(gasoline != undefined){
+					var algo = avion.position.distanceTo(gasoline.position);
+					if(algo <= 2.5){
+						duplicarGasolinas(arrayGasoline.length, 10);
+						scene.remove( gasoline );
+						//puntos += 1;
+						gasolina+=60;
+						//console.log(puntos);
+					}
+
+					if(gasoline.position.z <= -23){
+						duplicarGasolinas(arrayGasoline.length, 10);
+						scene.remove( gasoline );
 					}
 				}
 			}
@@ -464,9 +547,14 @@ timer_toro+=2;
 	
 	$(document).keydown(function(e) {
         if(e.key == "p"){
-            pausar = !pausar;
+            pausarJuego();
         }
     });
+
+    function pausarJuego()
+    {
+    	pausar = !pausar;
+    }
 
     function modeloOBJ(textura, modelo, posicionEjes, rotationEjes, escalaEjes, nombre) {
     //function modeloOBJ(materials){
@@ -504,17 +592,6 @@ timer_toro+=2;
       	  	scene.add( object );
       	  }
       });
-
-
-
-         /* materials.preload();
-          var objLoader = new THREE.OBJLoader();
-         objLoader.setMaterials( materials );
-          objLoader.setPath( 'modelos/avion/' );
-          objLoader.load( 'Avioneta_pivot.obj', function ( object ) {
-          	object.scale.set(0.01,0.01,0.01);
-            scene.add( object );
-          });*/
     }
 
     $(window).blur(function(e) {
@@ -549,13 +626,50 @@ timer_toro+=2;
           	object.scale.set(0.1,0.1,0.1);
           	object.name="gema"
           	//empty.add(object);
+          	var numrand = Math.floor(Math.random() * 7) + 1;
             scene.add( object );
             for (var i = 0; i < 8; i++) {
             	duplicarGemas(i, i+6);
-
+            	if(i == numrand || i == 0)
+            	{
+            		if(i==0){
+						duplicarGasolinas(0, i+6);
+            		}else{
+            			duplicarGasolinas(1, i+6);
+            		}
+            		
+            	}
             }
           });
     }
+
+     function modeloOBJMTL2(materials){
+          materials.preload();
+          var objLoader = new THREE.OBJLoader();
+          objLoader.setMaterials( materials );
+          objLoader.setPath( 'modelos/Gasoline_Canister/' );
+          objLoader.load( 'Gasoline_Canister.obj', function ( object ) {
+          	object.position.set(-40,0,30);
+          	object.scale.set(2,2,2);
+          	object.rotation.y = THREE.Math.degToRad(210);
+          	object.name="gasoline"
+          	//empty.add(object);
+            scene.add( object );
+          });
+    }
+
+    function duplicarGasolinas(i, posicion)
+	{
+		var gasoline = scene.getObjectByName("gasoline");
+		if(gasoline != undefined){
+				arrayGasoline.push(gasoline.clone());
+				arrayGasoline[i].name = "gasoline" + i;
+				arrayGasoline[i].position.z = 15 + posicion + Math.floor(Math.random() * 25) - 6;
+				arrayGasoline[i].position.y = Math.floor(Math.random() * 10) - 5;
+				scene.add(arrayGasoline[i]);
+
+		}
+	}
 
      function modeloOBJ2(textura, modelo, posicionEjes, rotationEjes, escalaEjes, nombre) {
     //function modeloOBJ(materials){
