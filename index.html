@@ -81,6 +81,7 @@
 			background-size:100%;
 			padding-left:5px;
 			padding-right:5px;
+			cursor: pointer;
 		}
 		.botones_estrellas img{
 			width:100%;
@@ -89,6 +90,18 @@
 		.botones_estrellas p{
 			text-align: center;
 			padding-top: 50%;
+		}
+
+		.divs{
+			width: 35%;
+    		height: 35%;
+    		margin-left: 33%;
+    		margin-top: 34%;
+		}
+
+		.divs2{
+			margin-left: 38%;
+    		margin-top: 38%;
 		}
 	</style>
 
@@ -135,8 +148,49 @@
 			init();
 			$(".loading").hide();
 			$(".pausa_fondo").hide();
+			$(".pausa").hide();
 			$(".perdiste_fondo").hide();
 		});
+
+		function hover(element, tipo) {
+			switch(tipo){
+				case 0:
+					element.setAttribute('src', 'images/pausar.png');
+					break;
+				case 1:
+					element.setAttribute('src', 'images/share.png');
+					break;
+				case 2:
+					element.setAttribute('src', 'images/logout.png');
+					break;
+				case 3:
+					element.setAttribute('src', 'images/reload.png');
+					break;
+				case 4:
+					element.setAttribute('src', 'images/play.png');
+					break;
+			}
+		}
+		
+		function unhover(element, tipo) {
+    		switch(tipo){
+				case 0:
+					element.setAttribute('src', 'images/pausarH.png');
+					break;
+				case 1:
+					element.setAttribute('src', 'images/shareH.png');
+					break;
+				case 2:
+					element.setAttribute('src', 'images/logoutH.png');
+					break;
+				case 3:
+					element.setAttribute('src', 'images/reloadH.png');
+					break;
+				case 4:
+					element.setAttribute('src', 'images/playH.png');
+					break;
+			}
+		}
 	</script> 
 
 	<div id="scene-section"/>
@@ -145,11 +199,21 @@
 		<img  src="images/pausa.png"  />
 		<br>
 		<div class = "botones_estrellas" id="reiniciar_p">
-			<p>Reiniciar</p>
+			<div class="divs">
+				<img style="max-width: 100%; max-height: 100%" onmouseover="hover(this, 3);" onmouseout="unhover(this, 3);" src="images/reloadH.png">
+			</div>	
 		</div>
 
-		<div class = "botones_estrellas">
-			<p>Salir</p>
+		<div class = "botones_estrellas" onclick="pausarJuego()">
+			<div class="divs divs2">
+				<img style="max-width: 100%; max-height: 100%" onmouseover="hover(this, 4);" onmouseout="unhover(this, 4);" src="images/playH.png">
+			</div>
+		</div>
+
+		<div class = "botones_estrellas" onclick="salirJuego()">
+			<div class="divs divs2">
+				<img style="max-width: 100%; max-height: 100%" onmouseover="hover(this, 2);" onmouseout="unhover(this, 2);" src="images/logoutH.png">
+			</div>	
 		</div>
 	</div >
 	
@@ -157,20 +221,30 @@
 		<img  src="images/perdiste.png"  />
 		<br>
 		<div class = "botones_estrellas" id="reiniciar_r">
-			<p>Reiniciar</p>
+			<div class="divs">
+				<img style="max-width: 100%; max-height: 100%" onmouseover="hover(this, 3);" onmouseout="unhover(this, 3);" src="images/reloadH.png">
+			</div>
 		</div>
 		
-		<div class = "botones_estrellas">
-			<p>Salir</p>
+		<div class = "botones_estrellas" onclick="salirJuego()">
+			<div class="divs divs2">
+				<img style="max-width: 100%; max-height: 100%" onmouseover="hover(this, 2);" onmouseout="unhover(this, 2);" src="images/logoutH.png">
+			</div>
 		</div>
-		
-		<button id="compartir" onclick="shareFB()">compartir</button>
+
+		<div class = "botones_estrellas" onclick="shareFB()">
+			<div class="divs divs2" style="margin-left: 31%;">
+				<img style="max-width: 100%; max-height: 100%" onmouseover="hover(this, 1);" onmouseout="unhover(this, 1);" src="images/shareH.png">
+			</div>	
+		</div>
 	</div >
 	
 	<div class="loading">
-		<img  src="images/loading.gif" />
+		<img src="images/loading.gif" />
 	</div >
 	
-	<div id="pausa" style="position: fixed;right: 1;"><button onclick="pausarJuego()">pausa</button></div>
+	<div class="pausa" style="position: fixed;right: 1; cursor: pointer; width: 5%; height: 7%; margin-top: 1%;">
+		<img class="pausa" onclick="pausarJuego()" style="max-width: 100%; max-height: 100%" onmouseover="hover(this, 0);" onmouseout="unhover(this, 0);" src="images/pausar.png">
+	</div>
 </body>
 </html>

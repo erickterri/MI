@@ -34,6 +34,7 @@
 	var temp;
 	var temp2;
 	var audioListo = false;
+	var continuar = true;
 
 	function init(){
 		var visibleSize = {width: window.innerWidth, height: window.innerHeight};
@@ -105,6 +106,9 @@
         modeloOBJ("modelos/toro/toro.jpg", "modelos/toro/toro_5.obj", [-40, -6, 0], [0, 0, 0], [0.005,0.005,0.005], "toro_5");
 
         THREE.Loader.Handlers.add( /\.dds$/i, new THREE.DDSLoader() );
+
+        mtlLoader.setPath( 'modelos/sky/' );
+        mtlLoader.load( 'sky.mtl', modeloOBJMTLCielo);
 
  		mtlLoader.setPath( 'modelos/Gasoline_Canister/' );
         mtlLoader.load( 'Gasoline_Canister.mtl', modeloOBJMTL2);
@@ -257,19 +261,21 @@
 /////////pausa+fin del juego gracias al sin gasolina cuando sea true
 		if(escenario_inicio!=null && sin_gasolina!=true){
 			$(".loading").hide();
+			$(".pausa").hide();
 			if(!pausar){
 				acciones(deltaTime);
 				////////Juego_Avanzando
 				$(".pausa_fondo").hide();
 				$(".perdiste_fondo").hide();
+				$(".pausa").show();
 				if (humo)
       				humo.update(deltaTime);
 			}
 			else{
 			///////Juego_Pausado
 				$("#reiniciar_p").click(function() {
-                reiniciar_juego();
-            });  
+                	reiniciar_juego();
+            	});  
 				$(".pausa_fondo").show();
 				sound4.pause();
 			}
@@ -277,6 +283,7 @@
 		else{
 			//////Juego_Perdido
 			$(".perdiste_fondo").show();
+			$(".pausa").hide();
 			if(sound4.isPlaying)
 				sound4.stop();
 			if(soundFondo.isPlaying)
@@ -376,7 +383,7 @@
 		var spot = scene.getObjectByName("spotify");
 		spot.position.x = 15;
 
-		escenario.rotation.y -= THREE.Math.degToRad(2 * deltaTime);
+		escenario.rotation.y -= THREE.Math.degToRad(7 * deltaTime);
 		
 		//timer_escenario-=0.1;
 		if(nubes1)
@@ -423,7 +430,7 @@
 				objectoHumo.position.y -= 6.5 * deltaTime;
 				objectoHumo.rotation.x += THREE.Math.degToRad(20 * deltaTime);
 				objectoHumo.visible = false;
-				
+				continuar = false;
 			}
 			else
 			{
@@ -481,51 +488,51 @@
 				rotarPositivo = true;
 			}
 			
-
-			if(teclado.pressed("w")){
-				avion.position.y += 7 * deltaTime;
-				avion.rotation.x -= THREE.Math.degToRad(10 * deltaTime);
-				camera.position.y += 7 * deltaTime;
-				objectoHumo.position.y += 6.5 * deltaTime;
-				objectoHumo.rotation.x -= THREE.Math.degToRad(20 * deltaTime);
-			} else if(teclado.pressed("s") && colision_piso==false){
-				avion.position.y -= 7 * deltaTime;
-				avion.rotation.x += THREE.Math.degToRad(10 * deltaTime);
-				camera.position.y -= 7 * deltaTime;
-				objectoHumo.position.y -= 6.5 * deltaTime;
-				objectoHumo.rotation.x += THREE.Math.degToRad(20 * deltaTime);
-			}
-
-
-			if(avion.position.y >= 21)
+			if(continuar)
 			{
-				avion.position.y = 21;
-				camera.position.y = 22.5;
-				objectoHumo.position.y = 20;
-				avion.rotation.x = temp;
-				objectoHumo.rotation.x = temp2;
-			}
-			else
-			{
-				temp = avion.rotation.x;
-				temp2 = objectoHumo.rotation.x;
-			}
+				if(teclado.pressed("w")){
+					avion.position.y += 7 * deltaTime;
+					avion.rotation.x -= THREE.Math.degToRad(10 * deltaTime);
+					camera.position.y += 7 * deltaTime;
+					objectoHumo.position.y += 6.5 * deltaTime;
+					objectoHumo.rotation.x -= THREE.Math.degToRad(20 * deltaTime);
+				} else if(teclado.pressed("s") && colision_piso==false){
+					avion.position.y -= 7 * deltaTime;
+					avion.rotation.x += THREE.Math.degToRad(10 * deltaTime);
+					camera.position.y -= 7 * deltaTime;
+					objectoHumo.position.y -= 6.5 * deltaTime;
+					objectoHumo.rotation.x += THREE.Math.degToRad(20 * deltaTime);
+				}
 
-			for(var i = 0; i < avion.rays.length; i++)
-			{
-				var ray = avion.rays[i];
-				rayCaster.set(avion.position, ray);
-				var collision = rayCaster.intersectObjects(escenario.children, true);
-				
-				if(collision.length > 0 && collision[0].distance < 3){
-					//////Juego_Perdido
-					$(".perdiste_fondo").show();
-					if(sound4.isPlaying)
-						sound4.stop();
-					sin_gasolina = true;
+				if(avion.position.y >= 21)
+				{
+					avion.position.y = 21;
+					camera.position.y = 22.5;
+					objectoHumo.position.y = 20;
+					avion.rotation.x = temp;
+					objectoHumo.rotation.x = temp2;
+				}
+				else
+				{
+					temp = avion.rotation.x;
+					temp2 = objectoHumo.rotation.x;
+				}
+
+				for(var i = 0; i < avion.rays.length; i++)
+				{
+					var ray = avion.rays[i];
+					rayCaster.set(avion.position, ray);
+					var collision = rayCaster.intersectObjects(escenario.children, true);
+					
+					if(collision.length > 0 && collision[0].distance < 3){
+						//////Juego_Perdido
+						$(".perdiste_fondo").show();
+						if(sound4.isPlaying)
+							sound4.stop();
+						sin_gasolina = true;
+					}
 				}
 			}
-
 
 			for (var i = 0; i < arrayGemas.length; i++) {
 				var gema = scene.getObjectByName("gema" + i);
@@ -534,20 +541,22 @@
 					gema.position.z -= 5 * deltaTime;
 					gema.rotation.y -= THREE.Math.degToRad(35 * deltaTime);
 				}
+				
+				if(continuar){
+					if(gema != undefined){
+						var algo = avion.position.distanceTo(gema.position);
+						if(algo <= 2.5){
+							duplicarGemas(arrayGemas.length, 10);
+							scene.remove( gema );
+							puntos += 1;
+							//gasolina+=50;
+							console.log(puntos);
+						}
 	
-				if(gema != undefined){
-					var algo = avion.position.distanceTo(gema.position);
-					if(algo <= 2.5){
-						duplicarGemas(arrayGemas.length, 10);
-						scene.remove( gema );
-						puntos += 1;
-						//gasolina+=50;
-						console.log(puntos);
-					}
-
-					if(gema.position.z <= -25){
-						duplicarGemas(arrayGemas.length, 10);
-						scene.remove( gema );
+						if(gema.position.z <= -25){
+							duplicarGemas(arrayGemas.length, 10);
+							scene.remove( gema );
+						}
 					}
 				}
 			}
@@ -559,22 +568,23 @@
 					gasoline.position.z -= 5 * deltaTime;
 					gasoline.rotation.y -= THREE.Math.degToRad(35 * deltaTime);
 				}
+				if(continuar){
+					if(gasoline != undefined){
+						var algo = avion.position.distanceTo(gasoline.position);
+						if(algo <= 2.5){
+							duplicarGasolinas(arrayGasoline.length, 10);
+							scene.remove( gasoline );
+							//puntos += 1;
+							gasolina+=60;
+							//console.log(puntos);
+						}
 	
-				if(gasoline != undefined){
-					var algo = avion.position.distanceTo(gasoline.position);
-					if(algo <= 2.5){
-						duplicarGasolinas(arrayGasoline.length, 10);
-						scene.remove( gasoline );
-						//puntos += 1;
-						gasolina+=60;
-						//console.log(puntos);
+						if(gasoline.position.z <= -23){
+							duplicarGasolinas(arrayGasoline.length, 10);
+							scene.remove( gasoline );
+						}
 					}
-
-					if(gasoline.position.z <= -23){
-						duplicarGasolinas(arrayGasoline.length, 10);
-						scene.remove( gasoline );
-					}
-				}
+				}	
 			}
 		}
 	
@@ -657,7 +667,7 @@
 			arrayGemas.push(gema.clone());
 			arrayGemas[i].name = "gema" + i;
 			arrayGemas[i].position.z = 15 + posicion + Math.floor(Math.random() * 25) - 6;
-			arrayGemas[i].position.y = Math.floor(Math.random() * 10) - 5;
+			arrayGemas[i].position.y = Math.floor(Math.random() * 18) - 5;
 			scene.add(arrayGemas[i]);
 		}
 	}
@@ -688,7 +698,7 @@
        });
     }
 
-     function modeloOBJMTL2(materials){
+    function modeloOBJMTL2(materials){
         materials.preload();
         var objLoader = new THREE.OBJLoader();
         objLoader.setMaterials( materials );
@@ -703,6 +713,21 @@
         });
     }
 
+     function modeloOBJMTLCielo(materials){
+        materials.preload();
+        var objLoader = new THREE.OBJLoader();
+        objLoader.setMaterials( materials );
+        objLoader.setPath( 'modelos/sky/' );
+        objLoader.load( 'sky.obj', function ( object ) {
+        	object.position.set(80,0,0);
+        	object.scale.set(2,2,2);
+        	object.rotation.z = THREE.Math.degToRad(90);
+        	object.name="sky"
+        	//empty.add(object);
+          scene.add( object );
+        });
+    }
+
     function duplicarGasolinas(i, posicion)
 	{
 		var gasoline = scene.getObjectByName("gasoline");
@@ -710,7 +735,7 @@
 				arrayGasoline.push(gasoline.clone());
 				arrayGasoline[i].name = "gasoline" + i;
 				arrayGasoline[i].position.z = 15 + posicion + Math.floor(Math.random() * 25) - 6;
-				arrayGasoline[i].position.y = Math.floor(Math.random() * 10) - 5;
+				arrayGasoline[i].position.y = Math.floor(Math.random() * 18) - 5;
 				scene.add(arrayGasoline[i]);
 
 		}
@@ -734,4 +759,8 @@
 			var avion = scene.getObjectByName("avion");
           	avion.add(object);
       });
+    }
+
+    function salirJuego(){
+    	window.location.replace("http://miadventure.x10.mx/triptime.html");
     }
