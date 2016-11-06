@@ -14,7 +14,7 @@
      fjs.parentNode.insertBefore(js, fjs);
    }(document, 'script', 'facebook-jssdk'));
 
-    function shareScore(score){
+  function shareScore(score){
       FB.ui({
         method: 'share',
         picture:'http://miadventure.x10.mx/portadaMI2.png',
