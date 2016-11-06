@@ -19,7 +19,7 @@
         method: 'feed',
         picture:'http://i.imgur.com/QmPZdkH.jpg',
         link:'http://miadventure.x10.mx/',
-        caption: 'MI Adventure: TripTime African Adventure',
+        caption: 'MI Adventure: African Adventure',
         quote: "My Score: " + score,
         hashtag: "#MiAdventure"
       }, function(response){});
