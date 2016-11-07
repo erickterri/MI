@@ -28,6 +28,8 @@
 	var spotLight = new THREE.SpotLight( 0xffffff, 1 );
 	var humo;
 	var objectoHumo = new THREE.Object3D();
+	var fuego;
+	var objectoFuego = new THREE.Object3D();
 	var soundFondo;
 	var sound4;
 	var soundChoqueSuelo;
@@ -156,23 +158,44 @@
 	}
 
 	function particulaHumo(textura) {
-  	  scene.add(objectoHumo);
-  	  humo = new SpriteParticleSystem({
-  	    cloud:objectoHumo,
-  	    rate:5,
-  	    num:30,
-  	    texture:textura,
-  	    scaleR:[0.01,0.09],
-  	    speedR:[0,0.5],
-  	    rspeedR:[-0.1,0.3],
-  	    lifespanR:[3,4],
-  	    terminalSpeed:20
-  	  });
-  	  humo.addForce(new THREE.Vector3(0,0,-10));
-  	  objectoHumo.position.z = -1.1;
-  	  objectoHumo.position.y = 4;
-  	  objectoHumo.position.x = -40;
-  	  humo.start();
+  	 	scene.add(objectoHumo);
+  	 	humo = new SpriteParticleSystem({
+  	 	  cloud:objectoHumo,
+  	 	  rate:5,
+  	 	  num:30,
+  	 	  texture:textura,
+  	 	  scaleR:[0.01,0.09],
+  	 	  speedR:[0,0.5],
+  	 	  rspeedR:[-0.1,0.3],
+  	 	  lifespanR:[3,4],
+  	 	  terminalSpeed:20
+  	 	});
+  	 	humo.addForce(new THREE.Vector3(0,0,-10));
+  	 	objectoHumo.position.z = -1.1;
+  	 	objectoHumo.position.y = 4;
+  	 	objectoHumo.position.x = -40;
+  	 	humo.start();
+  	}
+
+  	function particulaFuego(textura){
+  		objectoFuego.visible = false;
+  		scene.add(objectoFuego);
+  		fuego = new SpriteParticleSystem({
+  		  cloud:objectoFuego,
+  		  rate:25,
+  		  num:300,
+  		  texture:textura,
+  		  scaleR:[0.001,0.01],
+  		  speedR:[0,0.5],
+  		  rspeedR:[-0.1,0.3],
+  		  lifespanR:[0.5,0.6],
+  		  terminalSpeed:30
+  		});
+  		fuego.addForce(new THREE.Vector3(0,50,-10));
+  		objectoFuego.position.z = 2;
+  	 	objectoFuego.position.y = 5;
+  	 	objectoFuego.position.x = -40;
+  		fuego.start();
   	}
 
 	function ligthSpot(){
@@ -303,6 +326,8 @@
 				$(".pausa").show();
 				if (humo)
       				humo.update(deltaTime);
+      			if (fuego)
+      				fuego.update(deltaTime);
 			}
 			else{
 			///////Juego_Pausado
@@ -411,6 +436,7 @@
 		objectoHumo.position.y = 5;
 		objectoHumo.rotation.x = THREE.Math.degToRad(0);
 		objectoHumo.visible = true;
+		objectoFuego.visible = false;
 		puntos = 0;
 		timer_toro_mov = 0;
 		continuar = true;
@@ -424,8 +450,12 @@
 	 	rotarAvion = true;
 	 	rotarHumo = true;
 	 	iniciar = false;
+	 	contToggle = 0;
+	 	toggleable = false;
 	}
 
+	var contToggle=0;
+	var toggleable = false;
 	function acciones(deltaTime)
 	{
 		var avion = scene.getObjectByName("avion");
@@ -461,6 +491,27 @@
 				soundSinGas.play();
 			if(sound4)
 				sound4.stop();
+
+			contToggle += 1*deltaTime;
+			if(contToggle >= 0.5)
+			{
+				toggleable = true;
+				
+			}
+
+			if(contToggle >= 1)
+			{
+				toggleable = false;
+				contToggle = 0;
+			}
+
+			if(toggleable){
+				objectoHumo.visible = true;
+			}
+			else
+				objectoHumo.visible = false;
+			
+			objectoFuego.visible = true;
 		}
 		else
 		{
@@ -469,6 +520,9 @@
 					soundSinGas.stop();
 			if(sound4.isPlaying == false && audioListo)
 				sound4.play();
+
+			objectoHumo.visible = true;
+			objectoFuego.visible = false;
 		}
 
 		if(gasolina<=0)
@@ -481,7 +535,10 @@
 				camera.position.y -= 7 * deltaTime;
 				objectoHumo.position.y -= 6.5 * deltaTime;
 				objectoHumo.rotation.x += THREE.Math.degToRad(20 * deltaTime);
+				objectoFuego.position.y = objectoHumo.position.y;
+				objectoFuego.rotation.x = objectoHumo.rotation.x;
 				objectoHumo.visible = false;
+				objectoFuego.visible = true;
 				continuar = false;
 			}
 			else
@@ -551,6 +608,8 @@
 						camera.position.y += 10 * deltaTime;
 						objectoHumo.position.y += 9.8 * deltaTime;
 						objectoHumo.rotation.x -= THREE.Math.degToRad(30 * deltaTime);
+						objectoFuego.position.y = objectoHumo.position.y;
+						objectoFuego.rotation.x = objectoHumo.rotation.x;
 					} else{
 						avion.position.y -= 6 * deltaTime;
 						if(avion.rotation.x <= 0.5)
@@ -559,6 +618,9 @@
 						objectoHumo.position.y -= 5.9 * deltaTime;
 						if(objectoHumo.rotation.x <= 0.5)
 							objectoHumo.rotation.x += THREE.Math.degToRad(20 * deltaTime);
+
+						objectoFuego.position.y = objectoHumo.position.y;
+						objectoFuego.rotation.x = objectoHumo.rotation.x;
 					}
 				}
 				else
@@ -584,11 +646,13 @@
 						avion.position.y += 3 * deltaTime;
 						camera.position.y += 3 * deltaTime;
 						objectoHumo.position.y += 2.5 * deltaTime;
+						objectoFuego.position.y = objectoHumo.position.y;
 					}else
 					{
 						avion.position.y -= 3 * deltaTime;
 						camera.position.y -= 3 * deltaTime;
 						objectoHumo.position.y -= 2.5 * deltaTime;
+						objectoFuego.position.y = objectoHumo.position.y;
 					}
 					
 					
@@ -604,23 +668,26 @@
 				if(avion.position.y >= 21)
 				{
 					if(avion.position.y<21)
-						avion.position.y += 7*deltaTime;
+						avion.position.y += 10*deltaTime;
 					else
 						avion.position.y = 21;
 
 					camera.position.y = 22.5;
 
 					if(objectoHumo.position.y<21)
-						objectoHumo.position.y += 6.5*deltaTime;
+						objectoHumo.position.y += 9.8*deltaTime;
 					else
 						objectoHumo.position.y = 21;
 
 					if(avion.rotation.x <= 0){
-						avion.rotation.x += THREE.Math.degToRad(5);
+						avion.rotation.x += THREE.Math.degToRad(10);
 					}
 					if(objectoHumo.rotation.x <= 0){
-						objectoHumo.rotation.x += THREE.Math.degToRad(5);
+						objectoHumo.rotation.x += THREE.Math.degToRad(10);
 					}
+
+					objectoFuego.position.y = objectoHumo.position.y;
+					objectoFuego.rotation.x = objectoHumo.rotation.x;
 				}
 				else
 				{
@@ -785,6 +852,7 @@
      		scene.add( empty );
      		modeloOBJ2("modelos/avion/Avioneta.jpg", "modelos/avion/helice_avioneta.obj", posicionEjes, rotationEjes, escalaEjes, "helice");
      		THREE.ImageUtils.loadTexture( "images/smoke.png", undefined, particulaHumo );
+     		THREE.ImageUtils.loadTexture( "images/fire.png", undefined, particulaFuego );
      	}
      	else if(nombre == "nubesColision"){
      		scene.add( object );
