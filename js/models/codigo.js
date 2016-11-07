@@ -46,6 +46,8 @@
 	var movimientoInicial = true;
 	var rotarAvion = true;
 	var rotarHumo = true;
+	var moverObjetos = false;
+	var contadorObjetos = 0;
 
 	function init(){
 		var visibleSize = {width: window.innerWidth, height: window.innerHeight};
@@ -114,12 +116,12 @@
 		ligthSpot();
 		
 		var posicionEjes = [-40, 4, 0];
-        var rotationEjes = [0,00,0];
+        var rotationEjes = [0,0,0];
         var escalaEjes = [0.01,0.01,0.01];
         modeloOBJ("modelos/avion/Avioneta.jpg", "modelos/avion/Avioneta_pivot.obj", posicionEjes, rotationEjes, escalaEjes, "avion");   
-        modeloOBJ("modelos/esc.jpg", "modelos/escenario.obj", [10, -10, 0],  [0, 0, 0], [0.01,0.01,0.01], "escenario");
+        modeloOBJ("modelos/esc.jpg", "modelos/escenario.obj", [10, -10, 0],  [0, Math.floor(Math.random() * 360), 0], [0.01,0.01,0.01], "escenario");
         modeloOBJ("modelos/nubes/nubes.jpg", "modelos/nubes/nubes1.obj", [10, 0, 0],  [0, 160, 0], [0.008,0.01,0.008], "nubes1");
-        modeloOBJ("modelos/nubes/nubes.jpg", "modelos/Gasoline_Canister/gasolina.obj", [-40, 0, 30],  [0, 0, 0], [0.08,0.08,0.08], "nubesColision");
+        modeloOBJ("modelos/nube/nubes.jpg", "modelos/nube/nube_i_1.obj", [-40, 0, 30],  [0, 0, 0], [0.3,0.3,0.3], "nubesColision");
        /* modeloOBJ("modelos/nubes/nubes.jpg", "modelos/nubes/nubes1.obj", [10, -17, 0],  [0, 0, 0], [0.01,0.01,0.01], "nubes1_copy");
         modeloOBJ("modelos/nubes/nubes.jpg", "modelos/nubes/nubes1.obj", [10, 6, 0],  [0, 0, 0], [0.005,0.01,0.005], "nubes1_copy2");
         modeloOBJ("modelos/nubes/nubes.jpg", "modelos/nubes/nubes2.obj", [10, -13, 0],  [0, 0, 0], [0.01,0.01,0.01], "nubes2");
@@ -390,7 +392,7 @@
 		} 
 	};
 	
-	function reiniciar_juego(){	
+	function reiniciar_juego(){
 		var escenario = scene.getObjectByName("escenario");
 		var avion = scene.getObjectByName("avion");
 		$(".pausa_fondo").hide();
@@ -399,18 +401,28 @@
 		sin_gasolina=false;
 		pausar=false;
 		gasolina=400;
-		escenario.rotation.y = -10;
-		avion.position.y = 0;
+		escenario.rotation.y = THREE.Math.degToRad(Math.floor(Math.random() * 360));
+		avion.position.y = 5;
 		camera.position.x = -50.857240520821916;
-		camera.position.y = 0.7907654787042946;
+		camera.position.y = 5.7907654787042946;
 		camera.position.z = 2.7377030939659686;	
-		avion.rotation.x = 0;
-		objectoHumo.position.y = 0;
-		objectoHumo.rotation.x = 0;
+		avion.rotation.x = THREE.Math.degToRad(0);
+		avion.rotation.y = THREE.Math.degToRad(0);
+		objectoHumo.position.y = 5;
+		objectoHumo.rotation.x = THREE.Math.degToRad(0);
+		objectoHumo.visible = true;
+		puntos = 0;
 		timer_toro_mov = 0;
 		continuar = true;
-		sound4.play();	
-		
+		sound4.play();
+		soundFondo.play();
+		mostrar = false;
+	 	contador = 0;
+	 	conteo = 0;
+	 	iniciar = false;
+	 	movimientoInicial = true;
+	 	rotarAvion = true;
+	 	rotarHumo = true;
 	}
 
 	function acciones(deltaTime)
@@ -545,7 +557,7 @@
 						camera.position.y -= 6 * deltaTime;
 						objectoHumo.position.y -= 5.9 * deltaTime;
 						if(objectoHumo.rotation.x <= 0.5)
-							objectoHumo.rotation.x += THREE.Math.degToRad(30 * deltaTime);
+							objectoHumo.rotation.x += THREE.Math.degToRad(20 * deltaTime);
 					}
 				}
 				else
@@ -553,6 +565,12 @@
 					conteo += 1*deltaTime;
 					if(conteo >= 5)
 						iniciar = true;
+					
+					contadorObjetos += 1*deltaTime;
+					if(contadorObjetos >= 4)
+					{
+						moverObjetos = true;
+					}
 					
 					if(avion.position.y >= 4.5){
 						movimientoInicial = false;
@@ -621,20 +639,20 @@
 						if(sound4.isPlaying)
 							sound4.stop();
 						gasolina = 0;
-						document.getElementById("id_gasolina").style.width = (100*gasolina)/100 ;
 					}
 				}
 			}
+			
 
 			for (var i = 0; i < arrayGemas.length; i++) {
 				var gema = scene.getObjectByName("gema" + i);
-				if(gema != undefined)
+				if(gema != undefined && moverObjetos)
 				{
 					gema.position.z -= 5 * deltaTime;
 					gema.rotation.y -= THREE.Math.degToRad(35 * deltaTime);
 				}
 				
-				if(continuar){
+				if(continuar && iniciar){
 					if(gema != undefined){
 						var algo = avion.position.distanceTo(gema.position);
 						if(algo <= 2.5){
@@ -655,13 +673,13 @@
 
 			for (var i = 0; i < arrayNubes.length; i++) {
 				var nubesColision = scene.getObjectByName("nubesColision" + i);
-				if(nubesColision != undefined)
+				if(nubesColision != undefined && moverObjetos)
 				{
 					nubesColision.position.z -= 5 * deltaTime;
-					nubesColision.rotation.y -= THREE.Math.degToRad(35 * deltaTime);
+					//nubesColision.rotation.y -= THREE.Math.degToRad(35 * deltaTime);
 				}
 				
-				if(continuar){
+				if(continuar && iniciar){
 					if(nubesColision != undefined){
 						var algo = avion.position.distanceTo(nubesColision.position);
 						if(algo <= 2.5){
@@ -684,12 +702,12 @@
 
 			for (var i = 0; i < arrayGasoline.length; i++) {
 				var gasoline = scene.getObjectByName("gasoline" + i);
-				if(gasoline != undefined)
+				if(gasoline != undefined && moverObjetos)
 				{
 					gasoline.position.z -= 5 * deltaTime;
 					gasoline.rotation.y -= THREE.Math.degToRad(35 * deltaTime);
 				}
-				if(continuar){
+				if(continuar && iniciar){
 					if(gasoline != undefined){
 						var algo = avion.position.distanceTo(gasoline.position);
 						if(algo <= 2.5){
