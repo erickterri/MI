@@ -423,6 +423,7 @@
 	 	movimientoInicial = true;
 	 	rotarAvion = true;
 	 	rotarHumo = true;
+	 	iniciar = false;
 	}
 
 	function acciones(deltaTime)
