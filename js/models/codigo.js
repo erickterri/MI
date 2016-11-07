@@ -1017,5 +1017,5 @@
     }
 
     function salirJuego(){
-    	window.location.replace("http://miadventure.x10.mx/triptime.html");
+    	window.location.replace("http://miadventure.x10.mx/instrucciones.html");
     }
