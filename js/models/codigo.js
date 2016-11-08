@@ -307,6 +307,7 @@
 /////////pausa+fin del juego gracias al sin gasolina cuando sea true
 		if(escenario_inicio!=null && sin_gasolina!=true){
 			$(".loading").hide();
+			sound4.play();
 			$(".pausa").hide();
 			if(!pausar){
 				acciones(deltaTime);
@@ -341,14 +342,15 @@
 				{
 					mostrar = true;
 				}
+				
+				if(sound4.isPlaying)
+				sound4.stop();
 			}
-			
 			//////Juego_Perdido
 			if(mostrar)
 				$(".perdiste_fondo").show();
 			$(".pausa").hide();
-			if(sound4.isPlaying)
-				sound4.stop();
+			
 			if(soundFondo.isPlaying)
 				soundFondo.stop();
 			if(soundSinGas.isPlaying)
@@ -390,9 +392,14 @@
        		if(action == "puntaje"){
                 //obtener puntos actuales
                 //obtener 10 puntajes
-                var idUsuarioSave = JSON.parse(data);             
+                var idUsuarioSave = JSON.parse(data);
+                $("ul").text('');
+		for(var i = 0; i<idUsuarioSave.length; i++){
+			$("ul").append('<li>'+data[i].puntuacionUser+'</li>');
+		}             
             }
             else{
+            	$("#puntos").text('Score: ' + puntos);
             	servicioWeb("puntaje", "puntaje", puntos, idUsuario);
             }
       	});
