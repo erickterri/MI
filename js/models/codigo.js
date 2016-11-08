@@ -114,21 +114,15 @@
 
 		controls=new THREE.OrbitControls(camera,renderer.domElement);
 
-		//luz();
 		ligthSpot();
 		
 		var posicionEjes = [-40, 4, 0];
         var rotationEjes = [0,0,0];
         var escalaEjes = [0.01,0.01,0.01];
         modeloOBJ("modelos/avion/Avioneta.jpg", "modelos/avion/Avioneta_pivot.obj", posicionEjes, rotationEjes, escalaEjes, "avion");   
-        modeloOBJ("modelos/esc.jpg", "modelos/escenario.obj", [10, -10, 0],  [0, Math.floor(Math.random() * 360), 0], [0.01,0.01,0.01], "escenario");
+        modeloOBJ("modelos/esc.jpg", "modelos/esc3.obj", [10, -10, 0],  [0, Math.floor(Math.random() * 360), 0], [0.01,0.01,0.01], "escenario");
         modeloOBJ("modelos/nubes/nubes.jpg", "modelos/nubes/nubes1.obj", [10, 0, 0],  [0, 160, 0], [0.008,0.01,0.008], "nubes1");
         modeloOBJ("modelos/nube/nubes.jpg", "modelos/nube/nube_i_1.obj", [-40, 0, 30],  [0, 0, 0], [0.3,0.3,0.3], "nubesColision");
-       /* modeloOBJ("modelos/nubes/nubes.jpg", "modelos/nubes/nubes1.obj", [10, -17, 0],  [0, 0, 0], [0.01,0.01,0.01], "nubes1_copy");
-        modeloOBJ("modelos/nubes/nubes.jpg", "modelos/nubes/nubes1.obj", [10, 6, 0],  [0, 0, 0], [0.005,0.01,0.005], "nubes1_copy2");
-        modeloOBJ("modelos/nubes/nubes.jpg", "modelos/nubes/nubes2.obj", [10, -13, 0],  [0, 0, 0], [0.01,0.01,0.01], "nubes2");
-        modeloOBJ("modelos/nubes/nubes.jpg", "modelos/nubes/nubes3.obj", [10, -10, 0],  [0, 0, 0], [0.01,0.01,0.01], "nubes3");*/
-       // modeloOBJ("modelos/esc.jpg", "modelos/esc2.obj", [60, -20, 0],  rotationEjes, [0.01,0.01,0.01], "esc2");
         modeloOBJ("modelos/toro/toro.jpg", "modelos/toro/toro_1.obj", [-40, -6, 0], [0, 0, 0], [0.005,0.005,0.005], "toro_1");
        	modeloOBJ("modelos/toro/toro.jpg", "modelos/toro/toro_2.obj", [-40, -6, 0], [0, 0, 0], [0.005,0.005,0.005], "toro_2");
         modeloOBJ("modelos/toro/toro.jpg", "modelos/toro/toro_3.obj", [-40, -6, 0], [0, 0, 0], [0.005,0.005,0.005], "toro_3");
@@ -141,11 +135,7 @@
         mtlLoader.load( 'sky.mtl', modeloOBJMTLCielo);
 
         modeloOBJ("modelos/Gasoline_Canister/Jerry_Can_Green.jpg", "modelos/Gasoline_Canister/gasolina.obj", [-40, 0, 30],  [0, 210, 0], [0.08,0.08,0.08], "gasoline");
- 		//mtlLoader.setPath( 'modelos/Gasoline_Canister/' );
-        //mtlLoader.load( 'Gasoline_Canister.mtl', modeloOBJMTL2);
-
-        mtlLoader.setPath( 'modelos/41xph0z6k0xs-Diamond/' );
-        mtlLoader.load( 'DiamondGem.mtl', modeloOBJMTL);
+ 		modeloOBJ("modelos/diamante/gema.jpg", "modelos/diamante/gema.obj", [-40, 0, 30],  [0, 0, 0], [0.05,0.05,0.05], "gema");
 
 		//container.appendChild( stats.dom );
 		$("#scene-section").append(renderer.domElement);
@@ -339,12 +329,20 @@
 			}
 		}
 		else{
-
-			contador +=  1*deltaTime;
-			if(contador >= 2)
+			if(escenario_inicio)
 			{
-				mostrar = true;
+				if(contador == 0)
+				{
+					guardarPuntos(puntos);
+				}
+	
+				contador +=  1*deltaTime;
+				if(contador >= 3)
+				{
+					mostrar = true;
+				}
 			}
+			
 			//////Juego_Perdido
 			if(mostrar)
 				$(".perdiste_fondo").show();
@@ -363,6 +361,42 @@
 			}
 		}
 	}
+
+	var idUsuario = 0;
+	function guardarPuntos(puntos)
+    {
+        if(localStorage.getItem("sesion") != undefined && idUsuario == 0)
+        {
+        	var jsonString = localStorage.getItem("sesion");
+			var objetoUsuario = JSON.parse(jsonString);
+			idUsuario = parseInt(objetoUsuario[0].id);
+        }
+
+        if(sessionStorage.getItem("idUsuario") != undefined && idUsuario == 0)
+        {
+        	var jsonString = sessionStorage.getItem("idUsuario");
+			idUsuario = parseInt(jsonString);	
+        }
+
+        if(idUsuario != 0)
+        {
+        	servicioWeb("puntaje", "save", puntos, idUsuario);
+        }
+    }
+
+    function servicioWeb(tipo, action, score, idUsuario){
+    	$.post( "http://miadventure.x10.mx/webService.php", { score: score, idUsuario: idUsuario, tipo: tipo, action: action})
+      	.done(function( data ) {
+       		if(action == "puntaje"){
+                //obtener puntos actuales
+                //obtener 10 puntajes
+                var idUsuarioSave = JSON.parse(data);             
+            }
+            else{
+            	servicioWeb("puntaje", "puntaje", puntos, idUsuario);
+            }
+      	});
+    }
 
 	function torito(timer_toro, timer_toro_mov, toro_1, toro_2, toro_3, toro_4, toro_5) {
 		var toro_1 = scene.getObjectByName("toro_1");
@@ -724,16 +758,14 @@
 					if(gema != undefined){
 						var algo = avion.position.distanceTo(gema.position);
 						if(algo <= 2.5){
-							duplicarGemas(arrayGemas.length, 10);
-							scene.remove( gema );
 							puntos += 1;
-							//gasolina+=50;
-							//console.log(puntos);
+							gema.position.z = 15 + 10 + Math.floor(Math.random() * 25) - 6;
+							gema.position.y = Math.floor(Math.random() * 18) - 5;
 						}
 	
 						if(gema.position.z <= -25){
-							duplicarGemas(arrayGemas.length, 10);
-							scene.remove( gema );
+							gema.position.z = 15 + 10 + Math.floor(Math.random() * 25) - 6;
+							gema.position.y = Math.floor(Math.random() * 18) - 5;
 						}
 					}
 				}
@@ -744,25 +776,22 @@
 				if(nubesColision != undefined && moverObjetos)
 				{
 					nubesColision.position.z -= 5 * deltaTime;
-					//nubesColision.rotation.y -= THREE.Math.degToRad(35 * deltaTime);
 				}
 				
 				if(continuar && iniciar){
 					if(nubesColision != undefined){
 						var algo = avion.position.distanceTo(nubesColision.position);
 						if(algo <= 2.5){
-							duplicarNubes(arrayNubes.length, 10);
-							scene.remove( nubesColision );
-							//puntos += 1;
+							nubesColision.position.z = 15 + 10 + Math.floor(Math.random() * 25) - 6;
+							nubesColision.position.y = Math.floor(Math.random() * 18) - 5;
 							gasolina-=30;
 							document.getElementById("id_gasolina").style.width = (100*gasolina)/100 ;
-							//console.log(puntos);
 							soundChoqueNube.play();
 						}
 	
 						if(nubesColision.position.z <= -25){
-							duplicarNubes(arrayNubes.length, 10);
-							scene.remove( nubesColision );
+							nubesColision.position.z = 15 + 10 + Math.floor(Math.random() * 25) - 6;
+							nubesColision.position.y = Math.floor(Math.random() * 18) - 5;
 						}
 					}
 				}
@@ -779,16 +808,14 @@
 					if(gasoline != undefined){
 						var algo = avion.position.distanceTo(gasoline.position);
 						if(algo <= 2.5){
-							duplicarGasolinas(arrayGasoline.length, 10);
-							scene.remove( gasoline );
-							//puntos += 1;
+							gasoline.position.z = 15 + 10 + Math.floor(Math.random() * 25) - 6;
+							gasoline.position.y = Math.floor(Math.random() * 18) - 5;
 							gasolina+=60;
-							//console.log(puntos);
 						}
 	
 						if(gasoline.position.z <= -23){
-							duplicarGasolinas(arrayGasoline.length, 10);
-							scene.remove( gasoline );
+							gasoline.position.z = 15 + 10 + Math.floor(Math.random() * 25) - 6;
+							gasoline.position.y = Math.floor(Math.random() * 18) - 5;
 						}
 					}
 				}	
@@ -859,6 +886,21 @@
      		for (var i = 0; i < 4; i++) {
          		duplicarNubes(i, i+6);
          	}
+     	} else if(nombre == "gema")
+     	{
+     		scene.add( object );
+     		var numrand = Math.floor(Math.random() * 7) + 1;
+     		for (var i = 0; i < 8; i++) {
+         		duplicarGemas(i, i+6);
+         		if(i == numrand || i == 0)
+         		{
+         			if(i==0){
+					duplicarGasolinas(0, i+6);
+         			}else{
+         				duplicarGasolinas(1, i+6);
+         			}	
+         		}
+         	}
      	}
      	else{
      		scene.add( object );
@@ -896,73 +938,6 @@
 			scene.add(arrayNubes[i]);
 		}
 	}
-
-	 function modeloOBJGasolina(textura, modelo, posicionEjes, rotationEjes, escalaEjes, nombre) {
-      var terrainTexture = new THREE.ImageUtils.loadTexture(textura);
-      var materialTerrain = new THREE.MeshLambertMaterial({ map: terrainTexture, side: THREE.DoubleSide });
-      loader = new THREE.OBJLoader();
-      loader.load(modelo, function ( object ) {
-      	object.traverse( function ( child ) {
-            if ( child instanceof THREE.Mesh ) {
-                child.material.map = terrainTexture;
-            }
-      	});
-          
-     	object.name = nombre;
-     	object.position.z = posicionEjes[2];
-     	object.position.y = posicionEjes[1];
-     	object.position.x = posicionEjes[0];
-     	object.scale.x = escalaEjes[0];
-     	object.scale.y = escalaEjes[1];
-     	object.scale.z = escalaEjes[2];
-     	object.rotation.x = THREE.Math.degToRad(rotationEjes[0]);
-     	object.rotation.y = THREE.Math.degToRad(rotationEjes[1]);
-     	object.rotation.z = THREE.Math.degToRad(rotationEjes[2]);
-     	//object.receiveShadow = true; 
-     	scene.add( object );
-      });
-   }
- 
-    function modeloOBJMTL(materials){
-       materials.preload();
-       var objLoader = new THREE.OBJLoader();
-       objLoader.setMaterials( materials );
-       objLoader.setPath( 'modelos/41xph0z6k0xs-Diamond/' );
-       objLoader.load( 'DiamondGem.obj', function ( object ) {
-       	object.position.set(-40,0,30);
-       	object.scale.set(0.1,0.1,0.1);
-       	object.name="gema"
-       	//empty.add(object);
-       	var numrand = Math.floor(Math.random() * 7) + 1;
-         scene.add( object );
-         for (var i = 0; i < 8; i++) {
-         	duplicarGemas(i, i+6);
-         	if(i == numrand || i == 0)
-         	{
-         		if(i==0){
-				duplicarGasolinas(0, i+6);
-         		}else{
-         			duplicarGasolinas(1, i+6);
-         		}	
-         	}
-         }
-       });
-    }
-
-    function modeloOBJMTL2(materials){
-        materials.preload();
-        var objLoader = new THREE.OBJLoader();
-        objLoader.setMaterials( materials );
-        objLoader.setPath( 'modelos/Gasoline_Canister/' );
-        objLoader.load( 'Gasoline_Canister.obj', function ( object ) {
-        	object.position.set(-40,0,30);
-        	object.scale.set(2,2,2);
-        	object.rotation.y = THREE.Math.degToRad(210);
-        	object.name="gasoline"
-        	//empty.add(object);
-          scene.add( object );
-        });
-    }
 
      function modeloOBJMTLCielo(materials){
         materials.preload();
