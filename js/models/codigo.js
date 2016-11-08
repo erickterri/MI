@@ -332,6 +332,7 @@
 		else{
 			if(escenario_inicio)
 			{
+			sound4.play();
 				if(contador == 0)
 				{
 					guardarPuntos(puntos);
@@ -395,7 +396,7 @@
                 var idUsuarioSave = JSON.parse(data);
                 $("ul").text('');
 		for(var i = 0; i<idUsuarioSave.length; i++){
-			$("ul").append('<li>'+data[i].puntuacionUser+'</li>');
+			$("ul").append('<li>'+idUsuarioSave[i].puntuacionUser+'</li>');
 		}             
             }
             else{
