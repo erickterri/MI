@@ -307,7 +307,7 @@
 /////////pausa+fin del juego gracias al sin gasolina cuando sea true
 		if(escenario_inicio!=null && sin_gasolina!=true){
 			$(".loading").hide();
-			sound4.play();
+			soundFondo.play();
 			$(".pausa").hide();
 			if(!pausar){
 				acciones(deltaTime);
@@ -332,7 +332,7 @@
 		else{
 			if(escenario_inicio)
 			{
-			sound4.play();
+			soundFondo.play();
 				if(contador == 0)
 				{
 					guardarPuntos(puntos);
